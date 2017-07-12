@@ -11,6 +11,6 @@ CSV.foreach("age_by_office.csv", headers: true) do |row|
   }
 end
 
-File.open("../age_by_office.js", "w") do |f|
+File.open("../data/age_by_office.js", "w") do |f|
   f.write("var age_by_offices = #{ages.to_json};")
 end
