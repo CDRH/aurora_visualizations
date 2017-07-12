@@ -3,7 +3,7 @@ require 'json'
 
 contracts = []
 
-CSV.foreach("contracts.csv", headers: true) do |row, index|
+CSV.foreach("contracts.csv", headers: true) do |row|
   # unless if people have a better idea, I'm skipping anything with a "0"
   # for destination because otherwise it maps people as traveling to the
   # middle of the Atlantic Ocean
