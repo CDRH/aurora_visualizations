@@ -12,16 +12,12 @@ CSV.foreach("gender_by_office_totals.csv", headers: true) do |row|
     office_name = row["office"]
   end
   if !offices.has_key?(office_name)
-    offices[office_name] = {}
+    offices[office_name] = []
   end
   office = offices[office_name]
   # presumably gender + office combo should be unique, but checking in case not
   next if row["gender"] == "NULL"
-  if office.has_key?(row["gender"])
-    puts "Too many genders for #{office_name}: #{row["gender"]}, #{row["count"]}"
-  else
-    office[row["gender"]] = row["count"]
-  end
+  office << { "gender" => row["gender"], "totalContracts" => row["count"].to_i }
 end
 
 File.open("../data/gender_by_office.js", "w") do |f|
