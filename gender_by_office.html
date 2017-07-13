@@ -1,101 +1,33 @@
 <!DOCTYPE html>
-<!--
-    Stolen entirely from
-    http://ninjapixel.io/StackOverflow/doughnutTransition.html
--->
 <head>
   <title>Gender by Hiring Office</title>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="data/gender_by_office.js"></script>
 </head>
 <body>
-  <div class="container-fluid">
-      <input type="radio" name="office" id="alexandria" value="data1" checked="checked" onclick='change(data1);' />
-      <label for="alexandria">Alexandria</label>
-      <input type="radio" name="office" id="campnelson" value="data2" onclick='change(data2);' />
-      <label for="campnelson">Camp Nelson</label>
-      <input type="radio" name="office" id="chattanooga" value="data3" onclick='change(data3);' />
-      <label for="chattanooga">Chattanooga</label>
-      <input type="radio" name="office" id="louisville" value="data4" onclick='change(data4);' />
-      <label for="louisville">Louisville</label>
-      <input type="radio" name="office" id="memphis" value="data5" onclick='change(data5);' />
-      <label for="memphis">Memphis</label>
-      <input type="radio" name="office" id="petersburg" value="data6" onclick='change(data6);' />
-      <label for="petersburg">Petersburg</label>
-      <input type="radio" name="office" id="wisewellbarracks" value="data7" onclick='change(data7);' />
-      <label for="wisewellbarracks">Wisewell Barracks</label>
-      <input type="radio" name="office" id="all" value="data8" onclick='change(data8);' />
+  <div class="container-fluid gender">
+    <h1>Gender of Workers by Hiring Office</h1>
+      <input type="radio" name="office" id="all" checked="checked" onclick='change("All Offices");' />
       <label for="all">All Offices</label>
+      <input type="radio" name="office" id="alexandria" onclick='change("Alexandria");' />
+      <label for="alexandria">Alexandria</label>
+      <input type="radio" name="office" id="campnelson" onclick='change("Camp Nelson");' />
+      <label for="campnelson">Camp Nelson</label>
+      <input type="radio" name="office" id="chattanooga" onclick='change("Chattanooga");' />
+      <label for="chattanooga">Chattanooga</label>
+      <br>
+      <input type="radio" name="office" id="louisville" onclick='change("Louisville");' />
+      <label for="louisville">Louisville</label>
+      <input type="radio" name="office" id="memphis" onclick='change("Memphis");' />
+      <label for="memphis">Memphis</label>
+      <input type="radio" name="office" id="petersburg" onclick='change("Petersburg");' />
+      <label for="petersburg">Petersburg</label>
+      <input type="radio" name="office" id="wisewellbarracks" onclick='change("Wisewell Barracks");' />
+      <label for="wisewellbarracks">Wisewell Barracks</label>
     </br>
-    <div id='chartDiv'></div>
-</div>
+    <div id='genderChart'></div>
+  </div>
+
+  <script src="lib/pie/script.js"></script>
+
 </body>
-<script type="text/javascript">
-  var data1 = gender_by_offices["Alexandria"];
-  var data2 = gender_by_offices["Camp Nelson"];
-  var data3 = gender_by_offices["Chattanooga"];
-  var data4 = gender_by_offices["Louisville"];
-  var data5 = gender_by_offices["Memphis"];
-  var data6 = gender_by_offices["Petersburg"];
-  var data7 = gender_by_offices["Wisewell Barracks"];
-  var data8 = gender_by_offices["All Offices"];
-
-  var width = 800,
-  height = 250,
-  radius = Math.min(width, height) / 2;
-
-  var color = d3.scale.ordinal()
-  .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-
-  var arc = d3.svg.arc()
-  .outerRadius(radius - 10)
-  .innerRadius(0);
-
-  var pie = d3.layout.pie()
-  .sort(null)
-  .value(function(d) {
-    return d.totalContracts;
-  });
-
-
-  var svg = d3.select("#chartDiv").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .append("g")
-    .attr("id", "pieChart")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-  var path = svg.selectAll("path")
-    .data(pie(data1))
-    .enter()
-    .append("path");
-
-  path.transition()
-    .duration(500)
-    .attr("fill", function(d, i) {
-     return color(d.data.gender);
-    })
-    .attr("d", arc)
-    .each(function(d) {
-      this._current = d;
-  }); // store the initial angles
-
-
-  function change(data) {
-    path.data(pie(data));
-    path.transition().duration(750).attrTween("d", arcTween); // redraw the arcs
-
-  }
-
-// Store the displayed angles in _current.
-// Then, interpolate from _current to the new angles.
-// During the transition, _current is updated in-place by d3.interpolate.
-
-function arcTween(a) {
-  var i = d3.interpolate(this._current, a);
-  this._current = i(0);
-  return function(t) {
-    return arc(i(t));
-  };
-}
-</script>
