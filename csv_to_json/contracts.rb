@@ -3,6 +3,22 @@ require 'json'
 
 contracts = []
 
+def getDateEnd(start, months_str)
+  split_dates = start.split("-").map(&:to_i)
+  date = DateTime.new(*split_dates)
+  months = months_str.to_f
+  # if was not a float OR if was "1000 cords"
+  # then don't add the months
+  if months == 0.0 || months == 1000.0
+    # add at least a day so that it will show up on the timeline
+    return (date+1).strftime("%Y-%m-%d")
+  else
+    puts months
+    end_date = date << -months
+    return end_date.strftime("%Y-%m-%d")
+  end
+end
+
 CSV.foreach("contracts.csv", headers: true) do |row|
   # unless if people have a better idea, I'm skipping anything with a "0"
   # for destination because otherwise it maps people as traveling to the
@@ -18,6 +34,9 @@ CSV.foreach("contracts.csv", headers: true) do |row|
     ]
   }
   properties = row.to_hash
+  properties["start"] = row["contractDate"]
+  properties["end"] = getDateEnd(properties["start"], row["contractMonths"])
+
   contracts << {
     "type" => "Feature",
     "properties" => properties,
@@ -30,4 +49,4 @@ geojson = {
   "features" => contracts
 }
 
-File.open("../contracts.js", "w") { |f| f.write("var contracts = #{geojson.to_json};") }
+File.open("../data/contracts.js", "w") { |f| f.write("var contracts = #{geojson.to_json};") }
