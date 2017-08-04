@@ -3,20 +3,28 @@ require 'json'
 
 contracts = []
 
+# TODO reenable this if you prefer having stretched out timeslider
+# def getDateEnd(start, months_str)
+#   split_dates = start.split("-").map(&:to_i)
+#   date = DateTime.new(*split_dates)
+#   months = months_str.to_f
+#   # if was not a float OR if was "1000 cords"
+#   # then don't add the months
+#   if months == 0.0 || months == 1000.0
+#     # add at least a day so that it will show up on the timeline
+#     return (date+1).strftime("%Y-%m-%d")
+#   else
+#     puts months
+#     end_date = date << -months
+#     return end_date.strftime("%Y-%m-%d")
+#   end
+# end
+
 def getDateEnd(start, months_str)
+  # TODO ignoring the months_str for the purposes of a shortened timeslider
   split_dates = start.split("-").map(&:to_i)
   date = DateTime.new(*split_dates)
-  months = months_str.to_f
-  # if was not a float OR if was "1000 cords"
-  # then don't add the months
-  if months == 0.0 || months == 1000.0
-    # add at least a day so that it will show up on the timeline
-    return (date+1).strftime("%Y-%m-%d")
-  else
-    puts months
-    end_date = date << -months
-    return end_date.strftime("%Y-%m-%d")
-  end
+  return (date+1).strftime("%Y-%m-%d")
 end
 
 CSV.foreach("contracts.csv", headers: true) do |row|

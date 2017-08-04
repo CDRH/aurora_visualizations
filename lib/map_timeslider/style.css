@@ -6,3 +6,7 @@
 .leaflet-control.leaflet-timeline-control .sldr-ctrl-container {
   width: 100%;
 }
+
+.leaflet-bottom {
+  width: 20%;
+}
