@@ -15,14 +15,34 @@ require 'json'
 
 this_dir = File.dirname(__FILE__)
 input = "#{this_dir}/../csv/contracts.csv"
-output = "#{this_dir}/../../data/contracts.js"
+output_table = "#{this_dir}/../../data/contracts.js"
+output_geojson = "#{this_dir}/../../data/geojson.js"
 
 office_contracts = {
   "All" => []
 }
+@office_geojson = {}
 
-# geojson object
-map_contracts = {}
+def add_geojson(office, fields)
+  # skip if there is no lat / lng
+  if fields["destination_lng"].to_f != 0.0 && fields["destination_lat"].to_f != 0.0
+    # create some geojson
+    if !@office_geojson.has_key?(office)
+      @office_geojson[office] = []
+    end
+    @office_geojson[office] << {
+      "type" => "Feature",
+      "properties" => fields,
+      "geometry" => {
+        "type" => "LineString",
+        "coordinates" => [
+          [fields["office_lng"].to_f, fields["office_lat"].to_f],
+          [fields["destination_lng"].to_f, fields["destination_lat"].to_f]
+        ]
+      }
+    }
+  end
+end
 
 def get_fields(row)
   # there are a number of fields on the spreadsheet
@@ -30,8 +50,8 @@ def get_fields(row)
   dest_lat, dest_lng = row["destination_LatLng"] ? row["destination_LatLng"].split(/,\s?/) : [nil, nil]
   office_lat, office_lng = row["hiring_office_latlng"].split(/,\s?/)
   fields = {
-    "hiringOffice" => row["hiring_office"],
-    "contractDate" => row["contract_date"],
+    "hiring_office" => row["hiring_office"],
+    "contract_date" => row["contract_date"],
     "name" => row["label"],
     "gender" => row["gender"],
     "age" => row["age"],
@@ -39,23 +59,22 @@ def get_fields(row)
     "township" => row["township"],
     "county" => row["county"],
     "state" => row["state"],
-    "distanceMiles" => row["Distance/m"],
+    "distance_miles" => row["Distance/m"],
     "position" => row["position"],
-    "workClass" => row["work_class"],
-    "serviceMonths" => row["length_of_service_monthly"],
-    "wagesMonth" => row["rate_of_pay_monthly"],
+    "work_class" => row["work_class"],
+    "service_months" => row["length_of_service_monthly"],
+    "wages_month" => row["rate_of_pay_monthly"],
     "comments" => row["additional_comments"],
-    "destinationClass" => row["distance"],
+    "destination_class" => row["distance"],
     "group" => row["group"],
-    "destinationLat" => dest_lat,
-    "destinationLng" => dest_lng,
-    "hiringOfficeLat" => office_lat,
-    "hiringOfficeLng" => office_lng,
+    "destination_lat" => dest_lat,
+    "destination_lng" => dest_lng,
+    "office_lat" => office_lat,
+    "office_lng" => office_lng,
   }
 end
 
 CSV.foreach(input, headers: true) do |row|
-  # office = prepare_office_name(row["hiring_office"])
   office = row["hiring_office"].strip
   office_contracts[office] = [] if !office_contracts.has_key?(office)
   fields = get_fields(row)
@@ -63,9 +82,12 @@ CSV.foreach(input, headers: true) do |row|
   # add to office_contracts for specific office and for all
   office_contracts["All"] << fields
   office_contracts[office] << fields
+
+  next if office == "All"
+  add_geojson(office, fields)
 end
 
-# reorganize contract offices for eventual javascript display
+# TABLE display reorganization
 offices = []
 office_contracts.each do |office_key, values|
   offices << {
@@ -74,4 +96,20 @@ office_contracts.each do |office_key, values|
   }
 end
 
-File.open(output, "w") { |f| f.write("var contracts = #{offices.to_json};") }
+geojson = {
+  "All" => {
+    "type" => "FeatureCollection",
+    "features" => []
+  }
+}
+@office_geojson.each do |office_key, values|
+  geojson[office_key] = {
+    "type" => "FeatureCollection",
+    "features" => values
+  }
+  geojson["All"]["features"] = values
+
+end
+
+File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
+File.open(output_geojson, "w") { |f| f.write("var geojson = #{geojson.to_json};") }
