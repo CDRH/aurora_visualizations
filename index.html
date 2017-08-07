@@ -1,0 +1,125 @@
+<html>
+  <head>
+    <!-- leaflet stylesheet and js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" integrity="sha512-wcw6ts8Anuw10Mzh9Ytw4pylW8+NAD4ch3lqm9lzAsTxg0GFeJgoAtxuCLREZSC5lUXdVyo/7yfsqFjQ4S+aKw==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js" integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA==" crossorigin=""></script>
+
+    <!-- timeslider -->
+    <!-- <link rel="stylesheet" href="vendor/leaflet.timeline.min.css"/> -->
+    <!-- <script src="vendor/leaflet.timeline.min.js"></script> -->
+
+    <!-- jquery + bootstrap stylesheet and js -->
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- d3 for graphs and table -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+
+    <!-- aurora stylesheets and js -->
+    <link rel="stylesheet" href="assets/style.css">
+    <!-- <script src="data/destinations.js"></script> -->
+    <script src="data/contracts.js"></script>
+  </head>
+
+  <body>
+    <h1 id="officeTitle">Some Title</h1>
+    <div class="row">
+
+      <!-- offices navigation -->
+      <div class="col-md-2">
+        <div class="office-btns btn-group-vertical" role="group" aria-label="Hiring Offices">
+          <button type="button" class="btn btn-default" onclick="changeOffice('All');">All</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Alexandria');">Alexandria</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Camp Nelson');">Camp Nelson</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Chattanooga');">Chattanooga</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Louisville');">Louisville</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Memphis');">Memphis</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Petersburg');">Petersburg</button>
+          <button type="button" class="btn btn-default" onclick="changeOffice('Wisewell Barracks');">Wisewell Barracks</button>
+        </div>
+      </div>
+
+      <!-- map -->
+      <div class="col-md-2">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- charts -->
+    <div class="charts">
+      <p>There will be some charts here</p>
+    </div>
+
+    <!-- table of contracts -->
+    <div class="contracts">
+      <h2>Contracts</h2>
+    </div>
+  </body>
+
+  <script>
+    function changeOffice(office) {
+      document.getElementById("officeTitle").innerHTML = office;
+      var hiring_office_contracts = contracts.find(function(table) { return table.office == office });
+      update([hiring_office_contracts]);
+    }
+
+    // d3 stuff here
+    var tableDiv = d3.select("body div.contracts");
+    var initial = [contracts[0]];
+    var data = JSON.parse(JSON.stringify(initial));
+    update(data);
+
+    // adapted the majority of this function from
+    // https://bl.ocks.org/boeric/e16ad218bc241dfd2d6e
+    // "D3 Dynamic Array of Tables"
+    function update(data) {
+      // select the old div and remove it
+      var div = tableDiv.selectAll("div")
+          .data(data, function(d) { return d.office });
+      div.exit().remove();
+
+      // enter new data and title
+      var divEnter = div
+        .enter()
+          .append("h5").text(function(d) { return d.office; })
+          // .append("div").attr("class", "table-responsive")
+          .append("div")
+          // TODO if you want the table to be pseudo-responsive switch append("div") line comment above
+
+      var headers = [
+        "Hiring Office", "Contract Date", "Name", "Gender", "Age", "Employer",
+        "Township", "County", "State", "Distance Miles", "Position", "Work Class",
+        "Service (Months)", "Wages (Months)", "Comments", "Destination Class", "Group",
+        "Destination Lat", "Destination Lng", "Hiring Office Lat", "Hiring Office Lng"
+      ];
+
+      // add table and header
+      var tableEnter = divEnter.append("table")
+          .attr("id", function(d) { return d.office })
+          .attr("class", "table table-condensed table-striped table-bordered");
+      tableEnter.append("thead")
+        .append("tr")
+          .selectAll("th")
+          .data(headers)
+        .enter().append("th")
+          .text(function(d) { return d; });
+
+      // append table body in new table
+      tableEnter.append("tbody");
+
+      // select all tr elements in the divs update selection
+      var tr = div.select("table").select("tbody").selectAll("tr")
+          .data( function(d) { return d.rows; } ); 
+      // TODO do we need this?
+      // tr.exit().remove();
+
+      // bind data to rows and add columns
+      tr.enter().append("tr");
+      var td = tr.selectAll("td")
+          .data(function(d) { return d3.values(d); });
+      td.enter().append("td")
+          .text(function(d) { return d; })
+    }
+  </script>
+</html>
