@@ -44,6 +44,12 @@ def add_geojson(office, fields)
   end
 end
 
+def get_date(date_string, days_to_augment=0)
+  split_dates = date_string.split("-").map(&:to_i)
+  date = DateTime.new(*split_dates)
+  return (date+days_to_augment).strftime("%Y-%m-%d")
+end
+
 def get_fields(row)
   # there are a number of fields on the spreadsheet
   # that were used for calculations, this pairs it down to display / map fields
@@ -84,6 +90,8 @@ CSV.foreach(input, headers: true) do |row|
   office_contracts[office] << fields
 
   next if office == "All"
+  fields["start"] = get_date(fields["contract_date"])
+  fields["end"] = get_date(fields["contract_date"], 1)
   add_geojson(office, fields)
 end
 
@@ -92,7 +100,7 @@ offices = []
 office_contracts.each do |office_key, values|
   offices << {
     "office" => office_key,
-    "rows" => values.sort_by { |c| c["contractDate"]}
+    "rows" => values.sort_by { |c| c["contract_date"]}
   }
 end
 
