@@ -28,12 +28,12 @@ office_contracts = {
   "All" => {}
 }
 
-def add_destination(office, latlng, label)
+def add_destination(office_key, latlng, label)
   lat, lng = latlng.split("|")
-  if !@destination_popularity.has_key?(office)
-    @destination_popularity[office] = {}
+  if !@destination_popularity.has_key?(office_key)
+    @destination_popularity[office_key] = {}
   end
-  office = @destination_popularity[office]
+  office = @destination_popularity[office_key]
   if !office.has_key?(latlng)
     destination = {
       "label" => label,
@@ -42,7 +42,8 @@ def add_destination(office, latlng, label)
       "lng" => lng
     }
     office[latlng] = destination
-    @destination_popularity["All"][latlng] = destination
+    # clone or else magic and doubled numbers
+    @destination_popularity["All"][latlng] = destination.clone
   end
   office[latlng]["count"] += 1
   @destination_popularity["All"][latlng]["count"] += 1
