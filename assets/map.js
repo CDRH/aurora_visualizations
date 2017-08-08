@@ -15,8 +15,8 @@ var map = L.map('map', {
 
 var office_layers = {};
 // CREATE LAYER FOR EACH GEOJSON OBJECT
-for (var key in geojson) {
-  var layer = L.geoJSON(geojson[key], {
+for (var key in contracts_geojson) {
+  var layer = L.geoJSON(contracts_geojson[key], {
     style: function(feature) {
       return { "weight" : 1 };
     },
@@ -47,10 +47,8 @@ function destinationMarkerOptions(feature) {
 // BIND POPUP TO DESTINATION
 function onEachDestination(feature, layer) {
   prop = feature.properties;
-  html = "<h3>" + prop.township + ", " + prop.state + "</h3>";
-  html += "<ul>";
-  html += "<li>Contracts: " + prop.count + "</li>";
-  html += "<li>County: " + prop.county + "</li>";
+  html = "<h3>" + prop.label + "</h3>";
+  html += "<p>Contracts: " + prop.count + "</p>";
   layer.bindPopup(html);
 };
 
@@ -76,7 +74,7 @@ function onEachLine(feature, layer) {
 };
 
 // CREATE DESTINATION LAYER
-var destination_layer = L.geoJSON(destinations, {
+var destination_layer = L.geoJSON(destination_geojson["All"], {
   onEachFeature: onEachDestination,
   pointToLayer: function(feature, latlng) {
     return L.circleMarker(latlng, destinationMarkerOptions(feature));
@@ -98,5 +96,5 @@ function updateMap(current, requested) {
   map.fitBounds(office_layers[requested].getBounds());
   destination_layer.clearLayers();
   // TODO plug in the correct destination data
-  destination_layer.addData(destinations);
+  destination_layer.addData(destination_geojson[requested]);
 };

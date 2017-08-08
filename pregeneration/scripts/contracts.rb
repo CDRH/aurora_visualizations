@@ -16,13 +16,37 @@ require 'json'
 this_dir = File.dirname(__FILE__)
 input = "#{this_dir}/../csv/contracts.csv"
 output_table = "#{this_dir}/../../data/contracts.js"
-output_geojson = "#{this_dir}/../../data/geojson.js"
+output_contracts_geojson = "#{this_dir}/../../data/contracts_geojson.js"
+output_destination_geojson = "#{this_dir}/../../data/destination_geojson.js"
 
 office_contracts = {
   "All" => []
 }
 
 @combined_contract_routes = {}
+@destination_popularity = {
+  "All" => {}
+}
+
+def add_destination(office, latlng, label)
+  lat, lng = latlng.split("|")
+  if !@destination_popularity.has_key?(office)
+    @destination_popularity[office] = {}
+  end
+  office = @destination_popularity[office]
+  if !office.has_key?(latlng)
+    destination = {
+      "label" => label,
+      "count" => 0,
+      "lat" => lat,
+      "lng" => lng
+    }
+    office[latlng] = destination
+    @destination_popularity["All"][latlng] = destination
+  end
+  office[latlng]["count"] += 1
+  @destination_popularity["All"][latlng]["count"] += 1
+end
 
 def combine_contract_routes(office, fields)
   # assumes that no empty destination lat/lng passed through
@@ -38,15 +62,15 @@ def combine_contract_routes(office, fields)
     hiring_office[date] = {}
   end
 
-  destination = [fields["township"], fields["county"], fields["state"]]
-    .reject(&:nil?)
-    .reject(&:empty?)
-    .join(", ")
+  destination = destination_label(fields["township"], fields["county"], fields["state"])
 
   lat = fields["destination_lat"].to_f
   lng = fields["destination_lng"].to_f
   # yes, I know I split this apart originally, but that helped normalize the fields!
   latlng = "#{lat}|#{lng}"
+  # TODO probably this should be not happening in this method
+  add_destination(office, latlng, destination)
+
   if !hiring_office[date].has_key?(latlng)
     hiring_office[date][latlng] = {
       "type" => "Feature",
@@ -68,12 +92,19 @@ def combine_contract_routes(office, fields)
   hiring_office[date][latlng]["properties"]["contracts"] << fields
 end
 
+def destination_label(township, county, state)
+  return [township, county, state]
+    .reject(&:nil?)
+    .reject(&:empty?)
+    .join(", ")
+end
+
 def get_fields(row)
   # there are a number of fields on the spreadsheet
   # that were used for calculations, this pairs it down to display / map fields
   dest_lat, dest_lng = row["destination_LatLng"] ? row["destination_LatLng"].split(/,\s?/) : [nil, nil]
   office_lat, office_lng = row["hiring_office_latlng"].split(/,\s?/)
-  fields = {
+  return {
     "hiring_office" => row["hiring_office"],
     "contract_date" => row["contract_date"],
     "name" => row["label"],
@@ -107,6 +138,7 @@ CSV.foreach(input, headers: true) do |row|
   office_contracts["All"] << fields
   office_contracts[office] << fields
 
+  # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
   combine_contract_routes(office, fields)
 end
@@ -121,7 +153,7 @@ office_contracts.each do |office_key, values|
 end
 
 # GEOJSON organization
-geojson = {
+contracts_geojson = {
   "All" => {
     "type" => "FeatureCollection",
     "features" => []
@@ -130,16 +162,40 @@ geojson = {
 # no doubt there's a better way to flatten this rather than nested iterations
 # but since this isn't going to run every time I'm not gonna worry about it now
 @combined_contract_routes.each do |office_key, office_info|
-  geojson[office_key] = {
+  contracts_geojson[office_key] = {
     "type" => "FeatureCollection",
     "features" => []
   }
   office_info.each do |date, date_info|
     features = date_info.values
-    geojson[office_key]["features"] += features
-    geojson["All"]["features"] += features
+    contracts_geojson[office_key]["features"] += features
+    contracts_geojson["All"]["features"] += features
+  end
+end
+
+destination_geojson = {}
+@destination_popularity.each do |office_key, office_info|
+  destination_geojson[office_key] = {
+    "type" => "FeatureCollection",
+    "features" => []
+  }
+  destinations = office_info.values
+  destinations.each do |destination|
+    geojson_obj = {
+      "type" => "Feature",
+      "properties" => {
+        "label" => destination["label"],
+        "count" => destination["count"]
+      },
+      "geometry" => {
+        "type" => "Point",
+        "coordinates" => [destination["lng"], destination["lat"]]
+      }
+    }
+    destination_geojson[office_key]["features"] << geojson_obj
   end
 end
 
 File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
-File.open(output_geojson, "w") { |f| f.write("var geojson = #{geojson.to_json};") }
+File.open(output_contracts_geojson, "w") { |f| f.write("var contracts_geojson = #{contracts_geojson.to_json};") }
+File.open(output_destination_geojson, "w") { |f| f.write("var destination_geojson = #{destination_geojson.to_json};") }
