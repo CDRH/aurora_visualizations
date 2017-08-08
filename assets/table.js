@@ -2,7 +2,6 @@
 // https://bl.ocks.org/boeric/e16ad218bc241dfd2d6e
 // "D3 Dynamic Array of Tables"
 function updateTable(data) {
-  console.log(data);
   var tableDiv = d3.select("body div.contracts");
   // select the old div and remove it
   var div = tableDiv.selectAll("div")

@@ -13,26 +13,14 @@ var map = L.map('map', {
     layers: [osmLayer]
 });
 
-// CREATE OFFICE LAYERS
-var office_mapping = {
-  "Alexandria" : { "color" : "yellow" },
-  "All" : { "color" : "black" },
-  "Camp Nelson" : { "color" : "orange" },
-  "Chattanooga" : { "color" : "red" },
-  "Louisville" : { "color" : "green" },
-  "Memphis" : { "color" : "blue" },
-  "Petersburg" : { "color" : "magenta" },
-  "Wisewell Barracks" : { "color" : "indigo" }
-};
-
 var office_layers = {};
 // CREATE LAYER FOR EACH GEOJSON OBJECT
-for (var key in office_mapping) {
-  var office = office_mapping[key];
+for (var key in geojson) {
   var layer = L.geoJSON(geojson[key], {
     style: function(feature) {
-      return { "color" : office["color"], "weight" : 0.25 };
-    }
+      return { "weight" : 1 };
+    },
+    onEachFeature: onEachLine
   })
   office_layers[key] = layer;
 };
@@ -63,6 +51,27 @@ function onEachDestination(feature, layer) {
   html += "<ul>";
   html += "<li>Contracts: " + prop.count + "</li>";
   html += "<li>County: " + prop.county + "</li>";
+  layer.bindPopup(html);
+};
+
+// CREATE POPUP FOR EACH ROUTE
+function onEachLine(feature, layer) {
+  var props = feature.properties;
+  var html = "<div class='contractProperties'>";
+  html += "<h4>"+props.office+" to "+props.destination+"</h3>";
+  props.contracts.forEach(function(prop) {
+    html += "<strong>" + prop.name + "</strong>";
+    html += "<ul class='contractDesc'>";
+      html += "<li>Worker Age: " + prop.age + "</li>";
+      html += "<li>Worker Gender: " + prop.gender + "</li>";
+      html += "<li>Work Type: " + prop.work_class + "</li>";
+      html += "<li>Contract Date: " + prop.contract_date + "</li>";
+      html += "<li>Contract Employer: " + prop.employer + "</li>";
+      html += "<li>Wages: " + prop.wages_month + "</li>";
+      html += "<li>Period: " + prop.service_months + "</li>";
+    html += "</ul>"
+  });
+  html += "</div>";
   layer.bindPopup(html);
 };
 

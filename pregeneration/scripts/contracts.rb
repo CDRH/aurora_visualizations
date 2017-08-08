@@ -21,27 +21,51 @@ output_geojson = "#{this_dir}/../../data/geojson.js"
 office_contracts = {
   "All" => []
 }
-@office_geojson = {}
 
-def add_geojson(office, fields)
-  # skip if there is no lat / lng
-  if fields["destination_lng"].to_f != 0.0 && fields["destination_lat"].to_f != 0.0
-    # create some geojson
-    if !@office_geojson.has_key?(office)
-      @office_geojson[office] = []
-    end
-    @office_geojson[office] << {
+@combined_contract_routes = {}
+
+def combine_contract_routes(office, fields)
+  # assumes that no empty destination lat/lng passed through
+  # if multiple contracts following a route happen on the same DAY
+  # then combine the data for display purposes
+  # check hiring office -> date -> lat+lng
+  if !@combined_contract_routes.has_key?(office)
+    @combined_contract_routes[office] = {}
+  end
+  hiring_office = @combined_contract_routes[office]
+  date = fields["contract_date"]
+  if !hiring_office.has_key?(date)
+    hiring_office[date] = {}
+  end
+
+  destination = [fields["township"], fields["county"], fields["state"]]
+    .reject(&:nil?)
+    .reject(&:empty?)
+    .join(", ")
+
+  lat = fields["destination_lat"].to_f
+  lng = fields["destination_lng"].to_f
+  # yes, I know I split this apart originally, but that helped normalize the fields!
+  latlng = "#{lat}|#{lng}"
+  if !hiring_office[date].has_key?(latlng)
+    hiring_office[date][latlng] = {
       "type" => "Feature",
-      "properties" => fields,
+      "properties" => {
+        "contracts" => [],
+        "date" => date,
+        "office" => office,
+        "destination" => destination
+      },
       "geometry" => {
         "type" => "LineString",
         "coordinates" => [
           [fields["office_lng"].to_f, fields["office_lat"].to_f],
-          [fields["destination_lng"].to_f, fields["destination_lat"].to_f]
+          [lng, lat]
         ]
       }
     }
   end
+  hiring_office[date][latlng]["properties"]["contracts"] << fields
 end
 
 def get_fields(row)
@@ -83,11 +107,11 @@ CSV.foreach(input, headers: true) do |row|
   office_contracts["All"] << fields
   office_contracts[office] << fields
 
-  next if office == "All"
-  add_geojson(office, fields)
+  next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
+  combine_contract_routes(office, fields)
 end
 
-# TABLE display reorganization
+# TABLE display organization
 offices = []
 office_contracts.each do |office_key, values|
   offices << {
@@ -96,19 +120,25 @@ office_contracts.each do |office_key, values|
   }
 end
 
+# GEOJSON organization
 geojson = {
   "All" => {
     "type" => "FeatureCollection",
     "features" => []
   }
 }
-@office_geojson.each do |office_key, values|
+# no doubt there's a better way to flatten this rather than nested iterations
+# but since this isn't going to run every time I'm not gonna worry about it now
+@combined_contract_routes.each do |office_key, office_info|
   geojson[office_key] = {
     "type" => "FeatureCollection",
-    "features" => values
+    "features" => []
   }
-  geojson["All"]["features"] = values
-
+  office_info.each do |date, date_info|
+    features = date_info.values
+    geojson[office_key]["features"] += features
+    geojson["All"]["features"] += features
+  end
 end
 
 File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
