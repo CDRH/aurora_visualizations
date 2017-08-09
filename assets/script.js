@@ -1,15 +1,8 @@
 current_office = "All";
 // sets up d3 data
-var initial = contracts[0];
-var data = JSON.parse(JSON.stringify(initial));
-update("All", data);
-
-
-function changeOffice(office) {
-  document.getElementById("officeTitle").innerHTML = office;
-  var hiring_office_contracts = contracts.find(function(table) { return table.office == office });
-  update(office, hiring_office_contracts);
-}
+// var initial = contracts[0];
+// var data = JSON.parse(JSON.stringify(initial));
+update("All");
 
 function select_office_button(office) {
   buttons = document.getElementsByClassName("btn-office");
@@ -24,9 +17,14 @@ function select_office_button(office) {
   }
 }
 
-function update(office, data) {
-  select_office_button(office);
-  updateMap(current_office, office);
+function update(office) {
+  // grab the new data set and fire of d3 and the map
+  var data = contracts.find(function(table) { return table.office == office });
   updateTable([data]);
+  updateMap(current_office, office);
+  // change current office to new selection
   current_office = office;
+  // update basic UI to reflect selection
+  document.getElementById("officeTitle").innerHTML = office;
+  select_office_button(office);
 }

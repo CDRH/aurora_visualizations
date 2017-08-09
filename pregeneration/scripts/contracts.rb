@@ -23,7 +23,12 @@ office_contracts = {
   "All" => []
 }
 
-@combined_contract_routes = {}
+# add routes to All now rather than as final step
+# in order to accommodate sorting the dates
+# in the same step as the other office date keys
+@combined_contract_routes = {
+  "All" => {}
+}
 @destination_popularity = {
   "All" => {}
 }
@@ -58,9 +63,11 @@ def combine_contract_routes(office, fields)
     @combined_contract_routes[office] = {}
   end
   hiring_office = @combined_contract_routes[office]
+  all = @combined_contract_routes["All"]
   date = fields["contract_date"]
   if !hiring_office.has_key?(date)
     hiring_office[date] = {}
+    all[date] = {}
   end
 
   destination = destination_label(fields["township"], fields["county"], fields["state"])
@@ -73,11 +80,12 @@ def combine_contract_routes(office, fields)
   add_destination(office, latlng, destination)
 
   if !hiring_office[date].has_key?(latlng)
-    hiring_office[date][latlng] = {
+    feature = {
       "type" => "Feature",
       "properties" => {
         "contracts" => [],
         "date" => date,
+        # "time" => time,
         "office" => office,
         "destination" => destination
       },
@@ -89,8 +97,11 @@ def combine_contract_routes(office, fields)
         ]
       }
     }
+    hiring_office[date][latlng] = feature
+    all[date][latlng] = feature.clone
   end
   hiring_office[date][latlng]["properties"]["contracts"] << fields
+  @combined_contract_routes["All"][date][latlng]["properties"]["contracts"] << fields
 end
 
 def destination_label(township, county, state)
@@ -167,13 +178,16 @@ contracts_geojson = {
     "type" => "FeatureCollection",
     "features" => []
   }
+  # sort by the date key and make back into a hash
+  office_info = Hash[office_info.sort]
   office_info.each do |date, date_info|
+    # kill the latlong keys by going straight to the values
     features = date_info.values
     contracts_geojson[office_key]["features"] += features
-    contracts_geojson["All"]["features"] += features
   end
 end
 
+# destination wrangling
 destination_geojson = {}
 @destination_popularity.each do |office_key, office_info|
   destination_geojson[office_key] = {
