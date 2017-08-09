@@ -160,7 +160,7 @@ offices = []
 office_contracts.each do |office_key, values|
   offices << {
     "office" => office_key,
-    "rows" => values.sort_by { |c| c["contractDate"]}
+    "rows" => values.sort_by { |c| c["contract_date"]}
   }
 end
 
