@@ -123,6 +123,11 @@ map.addLayer(destination_layer);
 //   second param: opt. layers (mult selectable)
 L.control.layers({}, {"Popularity of Destination": destination_layer}, { collapsed: false }).addTo(map);
 
+// add the fullscreen control to the map
+L.control.fullscreen({
+  position: 'topleft',
+}).addTo(map);
+
 // add "All" at beginning
 map.addLayer(office_layers["All"]);
 map.addControl(time_sliders["All"]);
