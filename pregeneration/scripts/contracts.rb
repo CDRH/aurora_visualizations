@@ -20,12 +20,24 @@ input = "#{this_dir}/../csv/contracts.csv"
 output_table = "#{this_dir}/../../data/contracts.js"
 output_contracts_geojson = "#{this_dir}/../../data/contracts_geojson.js"
 output_destination_geojson = "#{this_dir}/../../data/destination_geojson.js"
+output_dclass = "#{this_dir}/../../data/destination_class.js"
 output_gender = "#{this_dir}/../../data/gender.js"
 output_occupation = "#{this_dir}/../../data/occupation.js"
 
 @combined_contract_routes = { "All" => {} }
 @destination_popularity = { "All" => {} }
 @office_contracts = { "All" => [] }
+@destination_class = {
+  "All" => {
+    "Same County" => 0,
+    "Within State or Nearby" => 0,
+    "North or South Border" => 0,
+    "North" => 0,
+    "Internal South" => 0,
+    "Internal or Deep South" => 0,
+    "Unknown" => 0
+  }
+}
 @gender = { "All" => { "female" => 0, "male" => 0, "unknown" => 0 } }
 @occupation = { "All" =>
   { "Agricultural" => 0, "Domestic" => 0, "Laborer" => 0, "Other" => 0, "Unspecified" => 0 }
@@ -139,6 +151,38 @@ def get_fields(row)
   }
 end
 
+def tally_destination_class(office, destination)
+  dclass = case destination
+    when "C"
+      "Same County"
+    when "P"
+      "Within State or Nearby"
+    when "BN"
+      "North or South Border"
+    when "N"
+      "North"
+    when "I"
+      "Internal South"
+    when "I/DS"
+      "Internal or Deep South"
+    else
+      "Unknown"
+    end
+  if !@destination_class.has_key?(office)
+    @destination_class[office] = {
+      "Same County" => 0,
+      "Within State or Nearby" => 0,
+      "North or South Border" => 0,
+      "North" => 0,
+      "Internal South" => 0,
+      "Internal or Deep South" => 0,
+      "Unknown" => 0
+    }
+  end
+  @destination_class[office][dclass] += 1
+  @destination_class["All"][dclass] += 1
+end
+
 def tally_gender(office, gender)
   gender = (gender == "female" || gender == "male") ? gender : "unknown"
   if !@gender.has_key?(office)
@@ -172,6 +216,8 @@ def tally_occupation(office, occupation)
   @occupation["All"][class_type] += 1
 end
 
+
+
 CSV.foreach(input, headers: true) do |row|
   office = row["hiring_office"].strip
   @office_contracts[office] = [] if !@office_contracts.has_key?(office)
@@ -180,6 +226,7 @@ CSV.foreach(input, headers: true) do |row|
   # add to office_contracts for specific office and for all
   @office_contracts["All"] << fields
   @office_contracts[office] << fields
+  tally_destination_class(office, fields["destination_class"])
   tally_gender(office, fields["gender"])
   tally_occupation(office, fields["work_class"])
 
@@ -244,6 +291,15 @@ destination_geojson = {}
   end
 end
 
+# format destination type
+dest_class_json = {}
+@destination_class.each do |office, office_info|
+  dest_class_json[office] = []
+  office_info.each do |dest, number|
+    dest_class_json[office] << { "property" => dest, "contracts" => number }
+  end
+end
+
 # format gender
 gender_json = {}
 @gender.each do |office, office_info|
@@ -265,5 +321,6 @@ end
 File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
 File.open(output_contracts_geojson, "w") { |f| f.write("var contracts_geojson = #{contracts_geojson.to_json};") }
 File.open(output_destination_geojson, "w") { |f| f.write("var destination_geojson = #{destination_geojson.to_json};") }
+File.open(output_dclass, "w") { |f| f.write("var destination_class = #{dest_class_json.to_json};") }
 File.open(output_gender, "w") { |f| f.write("var gender = #{gender_json.to_json};") }
 File.open(output_occupation, "w") { |f| f.write("var occupation = #{occupation_json.to_json};") }

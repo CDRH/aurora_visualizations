@@ -31,11 +31,40 @@ table {
 
 /* PIE CHARTS */
 
-#gender_svg {
-  /* because of calculations which use width / height
-     this is being controlled at the top of the gender.js file */
+/* Note: width and height being controlled in the
+   piechart implementation
+*/
+
+/* destination class */
+.dclass_Same_County {
+  fill: #DCDC61;
 }
 
+.dclass_Within_State_or_Nearby {
+  fill: #DCAF61;
+}
+
+.dclass_North_or_South_Border {
+  fill: #AC61DC;
+}
+
+.dclass_North {
+  fill: #6161DC;
+}
+
+.dclass_Internal_South {
+  fill: #D68080;
+}
+
+.dclass_Internal_or_Deep_South {
+  fill: #993D3D;
+}
+
+.dclass_Unknown {
+  fill: grey;
+}
+
+/* gender */
 .gender_female {
   fill: #98abc5; /* light blue */
 }
@@ -48,6 +77,7 @@ table {
   fill: #6b486b; /* plum */
 }
 
+/* occupation */
 .occupation_agricultural {
   fill: #5FAA6F;
 }

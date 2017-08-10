@@ -30,9 +30,7 @@ function update(office) {
   var data = contracts.find(function(table) { return table.office == office });
   updateTable([data]);
   updateMap(current_office, office);
-  // change pie charts
-  genderChart.updateChart(office);
-  occupationChart.updateChart(office);
+  updateCharts(office);
   // change current office to new selection
   current_office = office;
   // update basic UI to reflect selection

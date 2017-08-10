@@ -34,7 +34,7 @@ function PieChart(dataSet, label) {
     .enter()
       .append("path")
       .attr("class", function(d, i) {
-        return label+"_slice "+label+"_"+d.data.property;
+        return label+"_slice "+label+"_"+d.data.property.split(" ").join("_");
       });
 
   var text = svg.selectAll("text")
@@ -43,9 +43,8 @@ function PieChart(dataSet, label) {
       .append("text")
         .attr("class", "chart_label")
         .attr("transform", function(d) {
-          // d.innerRadius = 0;
-          // d.outerRadius = radius+10;
-          return "translate("+arc.centroid(d)+")";
+          var coords = labelCoords(d);
+          return "translate("+coords+")";
         });
 
   text
@@ -60,6 +59,13 @@ function PieChart(dataSet, label) {
       this._current = d;
     });
 
+  function labelCoords(d) {
+    var c = arc.centroid(d);
+    var x = c[0]*1.7;
+    var y = c[1]*1.7;
+    return x+","+y;
+  }
+
   function redrawPath() {
     path.transition().duration(750).attrTween("d", arcTween);
   }
@@ -70,7 +76,8 @@ function PieChart(dataSet, label) {
       .transition()
       .duration(750)
       .attr("transform", function(d) {
-        return "translate("+arc.centroid(d)+")";
+        var coords = labelCoords(d);
+        return "translate(" + coords + ")";
       })
       .text(function(d) {
         return d.data.property+": "+d.data.contracts;
@@ -98,5 +105,12 @@ function PieChart(dataSet, label) {
   }
 }
 
+var dclassChart = new PieChart(destination_class, "dclass");
 var genderChart = new PieChart(gender, "gender");
 var occupationChart = new PieChart(occupation, "occupation");
+
+function updateCharts(office) {
+  dclassChart.updateChart(office);
+  genderChart.updateChart(office);
+  occupationChart.updateChart(office);
+}
