@@ -77,6 +77,23 @@ table {
   fill: #6b486b; /* plum */
 }
 
+/* group */
+.group_group {
+  fill: #767471;
+}
+
+.group_individual {
+  fill: #EAB360;
+}
+
+.group_family {
+  fill: #D5D211;
+}
+
+.group_unknown {
+  fill: grey;
+}
+
 /* occupation */
 .occupation_agricultural {
   fill: #5FAA6F;

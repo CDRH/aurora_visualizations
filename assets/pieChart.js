@@ -107,10 +107,12 @@ function PieChart(dataSet, label) {
 
 var dclassChart = new PieChart(destination_class, "dclass");
 var genderChart = new PieChart(gender, "gender");
+var groupChart = new PieChart(group, "group");
 var occupationChart = new PieChart(occupation, "occupation");
 
 function updateCharts(office) {
   dclassChart.updateChart(office);
   genderChart.updateChart(office);
+  groupChart.updateChart(office);
   occupationChart.updateChart(office);
 }

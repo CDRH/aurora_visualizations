@@ -12,17 +12,18 @@ require 'json'
 #   - contracts by office sorted by date (including all offices)
 #   - geojson consolidating office to destination BY DAY (including all offices)
 #   - geojson with destination popularity calculations
-#   - breakdown of gender of individuals contracted at each office
-#   - breakdown of occupation contracted by each office
+#   - breakdown of gender, group type, occupation class, and destination class per office
 
 this_dir = File.dirname(__FILE__)
 input = "#{this_dir}/../csv/contracts.csv"
-output_table = "#{this_dir}/../../data/contracts.js"
-output_contracts_geojson = "#{this_dir}/../../data/contracts_geojson.js"
-output_destination_geojson = "#{this_dir}/../../data/destination_geojson.js"
-output_dclass = "#{this_dir}/../../data/destination_class.js"
-output_gender = "#{this_dir}/../../data/gender.js"
-output_occupation = "#{this_dir}/../../data/occupation.js"
+output_dir = "#{this_dir}/../../data"
+output_table = "#{output_dir}/contracts.js"
+output_contracts_geojson = "#{output_dir}/contracts_geojson.js"
+output_destination_geojson = "#{output_dir}/destination_geojson.js"
+output_dclass = "#{output_dir}/destination_class.js"
+output_group = "#{output_dir}/group.js"
+output_gender = "#{output_dir}/gender.js"
+output_occupation = "#{output_dir}/occupation.js"
 
 @combined_contract_routes = { "All" => {} }
 @destination_popularity = { "All" => {} }
@@ -39,6 +40,7 @@ output_occupation = "#{this_dir}/../../data/occupation.js"
   }
 }
 @gender = { "All" => { "female" => 0, "male" => 0, "unknown" => 0 } }
+@group = { "All" => { "Group" => 0, "Individual" => 0, "Family" => 0, "Unknown" => 0 }}
 @occupation = { "All" =>
   { "Agricultural" => 0, "Domestic" => 0, "Laborer" => 0, "Other" => 0, "Unspecified" => 0 }
 }
@@ -196,6 +198,29 @@ def tally_gender(office, gender)
   @gender["All"][gender] += 1
 end
 
+def tally_group(office, group_cd)
+  group = case group_cd
+    when "G"
+      "Group"
+    when "I"
+      "Individual"
+    when "F"
+      "Family"
+    else
+      "Unknown"
+    end
+  if !@group.has_key?(office)
+    @group[office] = {
+      "Group" => 0,
+      "Individual" => 0,
+      "Family" => 0,
+      "Unknown" => 0
+    }
+  end
+  @group[office][group] += 1
+  @group["All"][group] += 1
+end
+
 def tally_occupation(office, occupation)
   class_type = case occupation
     when "Agricultural", "Domestic", "Laborer", "Other"
@@ -228,6 +253,7 @@ CSV.foreach(input, headers: true) do |row|
   @office_contracts[office] << fields
   tally_destination_class(office, fields["destination_class"])
   tally_gender(office, fields["gender"])
+  tally_group(office, fields["group"])
   tally_occupation(office, fields["work_class"])
 
   # skip all the mapping related steps if there is no specific destination
@@ -291,36 +317,26 @@ destination_geojson = {}
   end
 end
 
-# format destination type
-dest_class_json = {}
-@destination_class.each do |office, office_info|
-  dest_class_json[office] = []
-  office_info.each do |dest, number|
-    dest_class_json[office] << { "property" => dest, "contracts" => number }
+def chart_formatter(variable)
+  chart_data = {}
+  variable.each do |office, office_info|
+    chart_data[office] = []
+    office_info.each do |property, number|
+      chart_data[office] << { "property" => property, "contracts" => number }
+    end
   end
+  return chart_data
 end
 
-# format gender
-gender_json = {}
-@gender.each do |office, office_info|
-  gender_json[office] = []
-  office_info.each do |gender, number|
-    gender_json[office] << { "property" => gender, "contracts" => number }
-  end
-end
-
-# format occupation
-occupation_json = {}
-@occupation.each do |office, office_info|
-  occupation_json[office] = []
-  office_info.each do |occupation, number|
-    occupation_json[office] << { "property" => occupation.downcase, "contracts" => number }
-  end
-end
+dest_class_json = chart_formatter(@destination_class)
+group_json = chart_formatter(@group)
+gender_json = chart_formatter(@gender)
+occupation_json = chart_formatter(@occupation)
 
 File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
 File.open(output_contracts_geojson, "w") { |f| f.write("var contracts_geojson = #{contracts_geojson.to_json};") }
 File.open(output_destination_geojson, "w") { |f| f.write("var destination_geojson = #{destination_geojson.to_json};") }
 File.open(output_dclass, "w") { |f| f.write("var destination_class = #{dest_class_json.to_json};") }
 File.open(output_gender, "w") { |f| f.write("var gender = #{gender_json.to_json};") }
+File.open(output_group, "w") { |f| f.write("var group = #{group_json.to_json};") }
 File.open(output_occupation, "w") { |f| f.write("var occupation = #{occupation_json.to_json};") }
