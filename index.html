@@ -26,6 +26,7 @@
     <script src="data/contracts_geojson.js"></script>
     <script src="data/destination_geojson.js"></script>
     <script src="data/gender.js"></script>
+    <script src="data/occupation.js"></script>
     <script src="assets/table.js"></script>
   </head>
 
@@ -55,9 +56,12 @@
     </div>
 
     <!-- charts -->
-    <div class="charts">
-      <div id="genderChart">
-      <p>Gender of Contracted Individuals</p>
+    <div class="charts row">
+      <div id="genderChart" class="col-md-4">
+        <p>Gender of Contracted Individuals</p>
+      </div>
+      <div id="occupationChart" class="col-md-4">
+        <p>Occupation of Contracted Individuals</p>
       </div>
     </div>
 
@@ -69,7 +73,7 @@
 
   <!-- includes map and script here, as leaflet requires DOM drawn before beginning -->
   <script src="assets/map.js"></script>
-  <script src="assets/gender.js"></script>
+  <script src="assets/pieChart.js"></script>
   <script src="assets/script.js"></script>
 
 </html>

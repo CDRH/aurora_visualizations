@@ -31,7 +31,8 @@ function update(office) {
   updateTable([data]);
   updateMap(current_office, office);
   // change pie charts
-  updateGender(office);
+  genderChart.updateChart(office);
+  occupationChart.updateChart(office);
   // change current office to new selection
   current_office = office;
   // update basic UI to reflect selection

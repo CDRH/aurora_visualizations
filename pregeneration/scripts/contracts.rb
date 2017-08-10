@@ -27,6 +27,9 @@ output_occupation = "#{this_dir}/../../data/occupation.js"
 @destination_popularity = { "All" => {} }
 @office_contracts = { "All" => [] }
 @gender = { "All" => { "female" => 0, "male" => 0, "unknown" => 0 } }
+@occupation = { "All" =>
+  { "Agricultural" => 0, "Domestic" => 0, "Laborer" => 0, "Other" => 0, "Unspecified" => 0 }
+}
 
 def add_destination(office_key, latlng, label)
   lat, lng = latlng.split("|")
@@ -149,6 +152,26 @@ def tally_gender(office, gender)
   @gender["All"][gender] += 1
 end
 
+def tally_occupation(office, occupation)
+  class_type = case occupation
+    when "Agricultural", "Domestic", "Laborer", "Other"
+      occupation
+    else
+      "Unspecified"
+    end
+  if !@occupation.has_key?(office)
+    @occupation[office] = {
+      "Agricultural" => 0,
+      "Domestic" => 0,
+      "Laborer" => 0,
+      "Other" => 0,
+      "Unspecified" => 0
+    }
+  end
+  @occupation[office][class_type] += 1
+  @occupation["All"][class_type] += 1
+end
+
 CSV.foreach(input, headers: true) do |row|
   office = row["hiring_office"].strip
   @office_contracts[office] = [] if !@office_contracts.has_key?(office)
@@ -158,6 +181,7 @@ CSV.foreach(input, headers: true) do |row|
   @office_contracts["All"] << fields
   @office_contracts[office] << fields
   tally_gender(office, fields["gender"])
+  tally_occupation(office, fields["work_class"])
 
   # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
@@ -225,7 +249,16 @@ gender_json = {}
 @gender.each do |office, office_info|
   gender_json[office] = []
   office_info.each do |gender, number|
-    gender_json[office] << { "gender" => gender, "contracts" => number }
+    gender_json[office] << { "property" => gender, "contracts" => number }
+  end
+end
+
+# format occupation
+occupation_json = {}
+@occupation.each do |office, office_info|
+  occupation_json[office] = []
+  office_info.each do |occupation, number|
+    occupation_json[office] << { "property" => occupation.downcase, "contracts" => number }
   end
 end
 
@@ -233,3 +266,4 @@ File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};"
 File.open(output_contracts_geojson, "w") { |f| f.write("var contracts_geojson = #{contracts_geojson.to_json};") }
 File.open(output_destination_geojson, "w") { |f| f.write("var destination_geojson = #{destination_geojson.to_json};") }
 File.open(output_gender, "w") { |f| f.write("var gender = #{gender_json.to_json};") }
+File.open(output_occupation, "w") { |f| f.write("var occupation = #{occupation_json.to_json};") }

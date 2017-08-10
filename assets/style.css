@@ -47,3 +47,23 @@ table {
 .gender_unknown {
   fill: #6b486b; /* plum */
 }
+
+.occupation_agricultural {
+  fill: #5FAA6F;
+}
+
+.occupation_domestic {
+  fill: #D4E892;
+}
+
+.occupation_laborer {
+  fill: #677145;
+}
+
+.occupation_other {
+  fill: #186D23;
+}
+
+.occupation_unspecified {
+  fill: #D6DCD7;
+}
