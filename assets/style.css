@@ -28,3 +28,22 @@
 table {
   font-size: 11px;
 }
+
+/* PIE CHARTS */
+
+#gender_svg {
+  /* because of calculations which use width / height
+     this is being controlled at the top of the gender.js file */
+}
+
+.gender_female {
+  fill: #98abc5; /* light blue */
+}
+
+.gender_male {
+  fill: #8a89a6; /* lavender */
+}
+
+.gender_unknown {
+  fill: #6b486b; /* plum */
+}

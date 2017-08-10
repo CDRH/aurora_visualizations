@@ -2,7 +2,15 @@ current_office = "All";
 // sets up d3 data
 // var initial = contracts[0];
 // var data = JSON.parse(JSON.stringify(initial));
-update("All");
+initialize();
+
+function initialize() {
+  // use "All" and assume it is first in the contracts
+  var data = contracts[0];
+  updateTable([data]);
+  updateMap("All", "All");
+  // the pie charts will kick off on their own
+}
 
 function select_office_button(office) {
   buttons = document.getElementsByClassName("btn-office");
@@ -22,6 +30,8 @@ function update(office) {
   var data = contracts.find(function(table) { return table.office == office });
   updateTable([data]);
   updateMap(current_office, office);
+  // change pie charts
+  updateGender(office);
   // change current office to new selection
   current_office = office;
   // update basic UI to reflect selection

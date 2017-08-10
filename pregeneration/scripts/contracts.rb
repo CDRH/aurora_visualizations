@@ -9,29 +9,24 @@ require 'json'
 # Purpose:
 #   This script takes a CSV with individual's contract information
 #   and manipulates it into the following JSON (sorta) objects
-#   - contracts by office sorted by date
-#   - contracts for all offices sorted by date
-#   - geojson consolidating office to destination BY DAY
+#   - contracts by office sorted by date (including all offices)
+#   - geojson consolidating office to destination BY DAY (including all offices)
+#   - geojson with destination popularity calculations
+#   - breakdown of gender of individuals contracted at each office
+#   - breakdown of occupation contracted by each office
 
 this_dir = File.dirname(__FILE__)
 input = "#{this_dir}/../csv/contracts.csv"
 output_table = "#{this_dir}/../../data/contracts.js"
 output_contracts_geojson = "#{this_dir}/../../data/contracts_geojson.js"
 output_destination_geojson = "#{this_dir}/../../data/destination_geojson.js"
+output_gender = "#{this_dir}/../../data/gender.js"
+output_occupation = "#{this_dir}/../../data/occupation.js"
 
-office_contracts = {
-  "All" => []
-}
-
-# add routes to All now rather than as final step
-# in order to accommodate sorting the dates
-# in the same step as the other office date keys
-@combined_contract_routes = {
-  "All" => {}
-}
-@destination_popularity = {
-  "All" => {}
-}
+@combined_contract_routes = { "All" => {} }
+@destination_popularity = { "All" => {} }
+@office_contracts = { "All" => [] }
+@gender = { "All" => { "female" => 0, "male" => 0, "unknown" => 0 } }
 
 def add_destination(office_key, latlng, label)
   lat, lng = latlng.split("|")
@@ -141,14 +136,28 @@ def get_fields(row)
   }
 end
 
+def tally_gender(office, gender)
+  gender = (gender == "female" || gender == "male") ? gender : "unknown"
+  if !@gender.has_key?(office)
+    @gender[office] = {
+      "female" => 0,
+      "male" => 0,
+      "unknown" => 0
+    }
+  end
+  @gender[office][gender] += 1
+  @gender["All"][gender] += 1
+end
+
 CSV.foreach(input, headers: true) do |row|
   office = row["hiring_office"].strip
-  office_contracts[office] = [] if !office_contracts.has_key?(office)
+  @office_contracts[office] = [] if !@office_contracts.has_key?(office)
   fields = get_fields(row)
 
   # add to office_contracts for specific office and for all
-  office_contracts["All"] << fields
-  office_contracts[office] << fields
+  @office_contracts["All"] << fields
+  @office_contracts[office] << fields
+  tally_gender(office, fields["gender"])
 
   # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
@@ -157,7 +166,7 @@ end
 
 # TABLE display organization
 offices = []
-office_contracts.each do |office_key, values|
+@office_contracts.each do |office_key, values|
   offices << {
     "office" => office_key,
     "rows" => values.sort_by { |c| c["contract_date"]}
@@ -211,6 +220,16 @@ destination_geojson = {}
   end
 end
 
+# format gender
+gender_json = {}
+@gender.each do |office, office_info|
+  gender_json[office] = []
+  office_info.each do |gender, number|
+    gender_json[office] << { "gender" => gender, "contracts" => number }
+  end
+end
+
 File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
 File.open(output_contracts_geojson, "w") { |f| f.write("var contracts_geojson = #{contracts_geojson.to_json};") }
 File.open(output_destination_geojson, "w") { |f| f.write("var destination_geojson = #{destination_geojson.to_json};") }
+File.open(output_gender, "w") { |f| f.write("var gender = #{gender_json.to_json};") }
