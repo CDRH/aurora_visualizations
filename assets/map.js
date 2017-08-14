@@ -93,7 +93,7 @@ var office_layers = {};
 for (var key in contracts_geojson) {
   var layer = L.geoJSON(contracts_geojson[key], {
     style: function(feature) {
-      return { "weight" : 1.5 };
+      return { "weight" : 1, "color" : "black" };
     },
     onEachFeature: onEachLine
   })
