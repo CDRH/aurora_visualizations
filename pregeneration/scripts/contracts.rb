@@ -25,25 +25,51 @@ output_group = "#{output_dir}/group.js"
 output_gender = "#{output_dir}/gender.js"
 output_occupation = "#{output_dir}/occupation.js"
 
+# mappings for fields
+@mapping_dest_class = {
+  "C" => "Within County",
+  "P" => "Proximate County",
+  "BN" => "North or South Border",
+  "N" => "North",
+  "I" => "Internal South",
+  "I/DS" => "Internal or Deep South",
+  "U" => "Unknown"
+}
+
+@mapping_gender = {
+  "female" => "Female",
+  "male" => "Male",
+  "unknown" => "Unknown"
+}
+
+@mapping_group = {
+  "G" => "Group",
+  "I" => "Individual",
+  "F" => "Family",
+  "U" => "Unknown"
+}
+
+@mapping_occupation = ["Agricultural", "Domestic", "Laborer", "Other", "Unknown"]
+
 @combined_contract_routes = { "All" => {} }
 @destination_popularity = { "All" => {} }
 @office_contracts = { "All" => [] }
-@destination_class = {
-  "All" => {
-    "Same County" => 0,
-    "Within State or Nearby" => 0,
-    "North or South Border" => 0,
-    "North" => 0,
-    "Internal South" => 0,
-    "Internal or Deep South" => 0,
-    "Unknown" => 0
-  }
-}
-@gender = { "All" => { "female" => 0, "male" => 0, "unknown" => 0 } }
-@group = { "All" => { "Group" => 0, "Individual" => 0, "Family" => 0, "Unknown" => 0 }}
-@occupation = { "All" =>
-  { "Agricultural" => 0, "Domestic" => 0, "Laborer" => 0, "Other" => 0, "Unspecified" => 0 }
-}
+
+# bumping this above the counter holders below
+def zeroed_hash(mapping)
+  if mapping.class == Hash
+    mapping.map{ |k, v| [v, 0] }.to_h
+  elsif mapping.class == Array
+    mapping.map { |v| [v, 0] }.to_h
+  else
+    raise "Not sure how to process mapping of class #{mapping.class}"
+  end
+end
+
+@destination_class = { "All" => zeroed_hash(@mapping_dest_class) }
+@gender = { "All" => zeroed_hash(@mapping_gender) }
+@group = { "All" => zeroed_hash(@mapping_group) }
+@occupation = { "All" => zeroed_hash(@mapping_occupation) }
 
 def add_destination(office_key, latlng, label)
   lat, lng = latlng.split("|")
@@ -64,6 +90,27 @@ def add_destination(office_key, latlng, label)
   end
   office[latlng]["count"] += 1
   @destination_popularity["All"][latlng]["count"] += 1
+end
+
+def chart_formatter(variable)
+  chart_data = {}
+  variable.each do |office, office_info|
+    chart_data[office] = []
+    office_info.each do |property, number|
+      chart_data[office] << { "property" => property, "contracts" => number }
+    end
+  end
+  return chart_data
+end
+
+def code_to_label(mapping, code)
+  if mapping.class == Hash
+    return mapping[code] || "Unknown"
+  elsif mapping.class == Array
+    return mapping.include?(code) ? code : "Unknown"
+  else
+    raise "Not sure how to process mapping of class #{mapping.class}"
+  end
 end
 
 def combine_contract_routes(office, fields)
@@ -92,28 +139,33 @@ def combine_contract_routes(office, fields)
   add_destination(office, latlng, destination)
 
   if !hiring_office[date].has_key?(latlng)
-    feature = {
-      "type" => "Feature",
-      "properties" => {
-        "contracts" => [],
-        "date" => date,
-        # "time" => time,
-        "office" => office,
-        "destination" => destination
-      },
-      "geometry" => {
-        "type" => "LineString",
-        "coordinates" => [
-          [fields["office_lng"].to_f, fields["office_lat"].to_f],
-          [lng, lat]
-        ]
-      }
-    }
-    hiring_office[date][latlng] = feature
-    all[date][latlng] = feature.clone
+    feature_params = [office, date, destination, fields, lat, lng]
+    office_feature = geojson_feature(*feature_params)
+    all_feature = geojson_feature(*feature_params)
+    hiring_office[date][latlng] = office_feature
+    all[date][latlng] = all_feature
   end
-  hiring_office[date][latlng]["properties"]["contracts"] << fields
-  @combined_contract_routes["All"][date][latlng]["properties"]["contracts"] << fields
+  hiring_office[date][latlng]["properties"]["contracts"] << fields.clone
+  @combined_contract_routes["All"][date][latlng]["properties"]["contracts"] << fields.clone
+end
+
+def geojson_feature(office, date, destination, fields, lat, lng)
+  {
+    "type" => "Feature",
+    "properties" => {
+      "contracts" => [],
+      "date" => date,
+      "office" => office,
+      "destination" => destination
+    },
+    "geometry" => {
+      "type" => "LineString",
+      "coordinates" => [
+        [fields["office_lng"].to_f, fields["office_lat"].to_f],
+        [lng, lat]
+      ]
+    }
+  }
 end
 
 def destination_label(township, county, state)
@@ -132,7 +184,7 @@ def get_fields(row)
     "hiring_office" => row["hiring_office"],
     "contract_date" => row["contract_date"],
     "name" => row["label"],
-    "gender" => row["gender"],
+    "gender" => code_to_label(@mapping_gender, row["gender"]),
     "age" => row["age"],
     "employer" => row["employer_agent"],
     "township" => row["township"],
@@ -140,12 +192,11 @@ def get_fields(row)
     "state" => row["state"],
     "distance_miles" => row["Distance/m"],
     "position" => row["position"],
-    "work_class" => row["work_class"],
+    "work_class" => code_to_label(@mapping_occupation, row["work_class"]),
     "service_months" => row["length_of_service_monthly"],
     "wages_month" => row["rate_of_pay_monthly"],
-    "comments" => row["additional_comments"],
-    "destination_class" => row["distance"],
-    "group" => row["group"],
+    "destination_class" => code_to_label(@mapping_dest_class, row["distance"]),
+    "group" => code_to_label(@mapping_group, row["group"]),
     "destination_lat" => dest_lat,
     "destination_lng" => dest_lng,
     "office_lat" => office_lat,
@@ -153,95 +204,13 @@ def get_fields(row)
   }
 end
 
-def tally_destination_class(office, destination)
-  dclass = case destination
-    when "C"
-      "Same County"
-    when "P"
-      "Within State or Nearby"
-    when "BN"
-      "North or South Border"
-    when "N"
-      "North"
-    when "I"
-      "Internal South"
-    when "I/DS"
-      "Internal or Deep South"
-    else
-      "Unknown"
-    end
-  if !@destination_class.has_key?(office)
-    @destination_class[office] = {
-      "Same County" => 0,
-      "Within State or Nearby" => 0,
-      "North or South Border" => 0,
-      "North" => 0,
-      "Internal South" => 0,
-      "Internal or Deep South" => 0,
-      "Unknown" => 0
-    }
+def tally_field(office, counter, value, mapping)
+  if !counter.has_key?(office)
+    counter[office] = zeroed_hash(mapping)
   end
-  @destination_class[office][dclass] += 1
-  @destination_class["All"][dclass] += 1
+  counter[office][value] += 1
+  counter["All"][value] += 1
 end
-
-def tally_gender(office, gender)
-  gender = (gender == "female" || gender == "male") ? gender : "unknown"
-  if !@gender.has_key?(office)
-    @gender[office] = {
-      "female" => 0,
-      "male" => 0,
-      "unknown" => 0
-    }
-  end
-  @gender[office][gender] += 1
-  @gender["All"][gender] += 1
-end
-
-def tally_group(office, group_cd)
-  group = case group_cd
-    when "G"
-      "Group"
-    when "I"
-      "Individual"
-    when "F"
-      "Family"
-    else
-      "Unknown"
-    end
-  if !@group.has_key?(office)
-    @group[office] = {
-      "Group" => 0,
-      "Individual" => 0,
-      "Family" => 0,
-      "Unknown" => 0
-    }
-  end
-  @group[office][group] += 1
-  @group["All"][group] += 1
-end
-
-def tally_occupation(office, occupation)
-  class_type = case occupation
-    when "Agricultural", "Domestic", "Laborer", "Other"
-      occupation
-    else
-      "Unspecified"
-    end
-  if !@occupation.has_key?(office)
-    @occupation[office] = {
-      "Agricultural" => 0,
-      "Domestic" => 0,
-      "Laborer" => 0,
-      "Other" => 0,
-      "Unspecified" => 0
-    }
-  end
-  @occupation[office][class_type] += 1
-  @occupation["All"][class_type] += 1
-end
-
-
 
 CSV.foreach(input, headers: true) do |row|
   office = row["hiring_office"].strip
@@ -249,21 +218,30 @@ CSV.foreach(input, headers: true) do |row|
   fields = get_fields(row)
 
   # add to office_contracts for specific office and for all
-  @office_contracts["All"] << fields
-  @office_contracts[office] << fields
-  tally_destination_class(office, fields["destination_class"])
-  tally_gender(office, fields["gender"])
-  tally_group(office, fields["group"])
-  tally_occupation(office, fields["work_class"])
+  @office_contracts["All"] << fields.clone
+  @office_contracts[office] << fields.clone
+  tally_field(office, @destination_class, fields["destination_class"], @mapping_dest_class)
+  tally_field(office, @gender, fields["gender"], @mapping_gender)
+  tally_field(office, @group, fields["group"], @mapping_group)
+  tally_field(office, @occupation, fields["work_class"], @mapping_occupation)
 
   # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
-  combine_contract_routes(office, fields)
+  combine_contract_routes(office, fields.clone)
 end
 
 # TABLE display organization
 offices = []
 @office_contracts.each do |office_key, values|
+  # remove a few columns we don't want in the display
+  values.map do |row|
+    row.delete("destination_lat")
+    row.delete("destination_lng")
+    row.delete("office_lat")
+    row.delete("office_lng")
+    row
+  end
+
   offices << {
     "office" => office_key,
     "rows" => values.sort_by { |c| c["contract_date"]}
@@ -289,7 +267,7 @@ contracts_geojson = {
   office_info.each do |date, date_info|
     # kill the latlong keys by going straight to the values
     features = date_info.values
-    contracts_geojson[office_key]["features"] += features
+    contracts_geojson[office_key]["features"] += features.clone
   end
 end
 
@@ -315,17 +293,6 @@ destination_geojson = {}
     }
     destination_geojson[office_key]["features"] << geojson_obj
   end
-end
-
-def chart_formatter(variable)
-  chart_data = {}
-  variable.each do |office, office_info|
-    chart_data[office] = []
-    office_info.each do |property, number|
-      chart_data[office] << { "property" => property, "contracts" => number }
-    end
-  end
-  return chart_data
 end
 
 dest_class_json = chart_formatter(@destination_class)

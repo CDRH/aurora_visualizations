@@ -18,8 +18,7 @@ function updateTable(data) {
   var headers = [
     "Hiring Office", "Contract Date", "Name", "Gender", "Age", "Employer",
     "Township", "County", "State", "Distance Miles", "Position", "Work Class",
-    "Service (Months)", "Wages (Months)", "Comments", "Destination Class", "Group",
-    "Destination Lat", "Destination Lng", "Hiring Office Lat", "Hiring Office Lng"
+    "Service (Months)", "Wages (Months)", "Destination Class", "Group"
   ];
 
   // add table and header

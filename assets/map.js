@@ -30,7 +30,7 @@ function onEachLine(feature, layer) {
   var props = feature.properties;
   var html = "<div class='contractProperties'>";
   html += "<h4>"+props.office+" to "+props.destination+"</h3>";
-  html += "<p>"+props.date+"</p>";
+  html += "<p>"+props.date+": "+props.contracts.length+" contract(s)</p>";
   props.contracts.forEach(function(prop) {
     html += "<strong>" + prop.name + "</strong>";
     html += "<ul class='contractDesc'>";

@@ -36,31 +36,31 @@ table {
 */
 
 /* destination class */
-.dclass_Same_County {
+.dclass_within_county {
   fill: #DCDC61;
 }
 
-.dclass_Within_State_or_Nearby {
+.dclass_proximate_county {
   fill: #DCAF61;
 }
 
-.dclass_North_or_South_Border {
+.dclass_north_or_south_border {
   fill: #AC61DC;
 }
 
-.dclass_North {
+.dclass_north {
   fill: #6161DC;
 }
 
-.dclass_Internal_South {
+.dclass_internal_south {
   fill: #D68080;
 }
 
-.dclass_Internal_or_Deep_South {
+.dclass_internal_or_deep_south {
   fill: #993D3D;
 }
 
-.dclass_Unknown {
+.dclass_unknown {
   fill: grey;
 }
 
@@ -111,6 +111,6 @@ table {
   fill: #186D23;
 }
 
-.occupation_unspecified {
+.occupation_unknown {
   fill: #D6DCD7;
 }
