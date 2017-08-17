@@ -29,10 +29,11 @@ Finally, the map's fullscreen ability is provided by [leaflet.fullscreen](https:
 
 The charts and table are built with [d3.js](https://d3js.org/).  Fortunately, despite d3 being unfamiliar territory, the following tutorials and answers were helpful in the construction of these features.
 
+- [D3 Dynamic Pie Chart Demo](https://codepen.io/interactivematt/pen/ZGWYOO) (majority of code's construction)
 - [D3 Dynamic Array of Tables](https://bl.ocks.org/boeric/e16ad218bc241dfd2d6e)
 - [Doughnut Transition demo](http://ninjapixel.io/StackOverflow/doughnutTransition.html)
-- [Simple Pie Chart](http://bl.ocks.org/enjalot/1203641) (labels)
-- [Stack Overflow changing labels](https://stackoverflow.com/a/21844448/4154134) (labels)
+- [Simple Pie Chart](http://bl.ocks.org/enjalot/1203641)
+- [Stack Overflow changing labels](https://stackoverflow.com/a/21844448/4154134)
 
 ## Other Components
 
