@@ -35,6 +35,18 @@ table {
    piechart implementation
 */
 
+/* label lines */
+polyline {
+  stroke: #333;
+  stroke-width: 1px;
+  fill: none;
+}
+
+/* labels */
+.graph_label {
+  font-size: 12px;
+}
+
 /* destination class */
 .dclass_within_county {
   fill: #DCDC61;

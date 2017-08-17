@@ -49,7 +49,7 @@ output_occupation = "#{output_dir}/occupation.js"
   "U" => "Unknown"
 }
 
-@mapping_occupation = ["Agricultural", "Domestic", "Laborer", "Other", "Unknown"]
+@mapping_occupation = ["Agricultural", "Laborer", "Domestic", "Other", "Unknown"]
 
 @combined_contract_routes = { "All" => {} }
 @destination_popularity = { "All" => {} }

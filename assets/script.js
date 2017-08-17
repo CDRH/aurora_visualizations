@@ -9,7 +9,7 @@ function initialize() {
   var data = contracts[0];
   updateTable([data]);
   updateMap("All", "All");
-  // the pie charts will kick off on their own
+  updateCharts("All")
 }
 
 function select_office_button(office) {
