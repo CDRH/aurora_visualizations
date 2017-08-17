@@ -96,20 +96,6 @@ function PieChart(dataSet, label) {
         };
       });
 
-    // bind new data to slices
-    slice = svg
-      .select(".slices")
-      .selectAll("path.slice")
-      .data(pie(newData), property);
-
-    // remove unused pie slices
-    slice
-      .exit()
-        .transition()
-        .delay(duration)
-        .duration(0)
-      .remove();
-
     /* ------- TEXT LABELS -------*/
 
     // bind the old data to the labels
@@ -173,19 +159,6 @@ function PieChart(dataSet, label) {
         };
       });
 
-    // bind new data to labels
-    text = svg
-      .select(".labels")
-      .selectAll("text")
-      .data(pie(newData), property);
-
-    // remove unused labels
-    text
-      .exit()
-      .transition()
-      .delay(duration)
-      .remove();
-
     /* ------- SLICE TO TEXT POLYLINES -------*/
 
     // bind old data to lines
@@ -230,20 +203,7 @@ function PieChart(dataSet, label) {
           return [arc.centroid(d2), outerArc.centroid(d2), pos];
         };
       });
-
-    // bind new data to lines
-    polyline = svg
-      .select(".lines")
-      .selectAll("polyline")
-      .data(pie(newData), property);
-
-    // remove unused lines
-    polyline
-      .exit()
-      .transition()
-      .delay(duration)
-      .remove();
-  };
+  }; // end change
 }
 
 // make the charts!
