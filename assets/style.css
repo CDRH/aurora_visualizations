@@ -9,6 +9,35 @@
   width: 600px;
 }
 
+/* all controls located on bottom */
+.leaflet-bottom {
+  width: 95%;
+}
+
+.leaflet-control-attribution {
+  /*
+    hiding from map pane rather than separate attribution
+    entirely in case of map div being reused elsewhere
+  */
+  display: none;
+}
+
+/* the bar upon which the sliding occurs */
+#leaflet-slider {
+  width: 100% !important;
+}
+
+/* contains all the slider components */
+.slider {
+  width: 100%;
+}
+
+/* the date which is displayed above slider when dragged */
+#slider-timestamp {
+  margin: auto;
+}
+
+
 /* using important tag to override inline styles defined
    in the slider JS library
 */
@@ -30,8 +59,8 @@ table {
 }
 
 .table-col-sorted {
-  font-weight: bold;
   color: black;
+  font-weight: bold;
   pointer-events: none;
 }
 
@@ -43,9 +72,9 @@ table {
 
 /* label lines */
 polyline {
+  fill: none;
   stroke: #333;
   stroke-width: 1px;
-  fill: none;
 }
 
 /* labels */
