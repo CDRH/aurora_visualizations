@@ -29,6 +29,11 @@ table {
   font-size: 11px;
 }
 
+.table-col-sorted {
+  font-weight: bold;
+  color: black;
+}
+
 /* PIE CHARTS */
 
 /* Note: width and height being controlled in the

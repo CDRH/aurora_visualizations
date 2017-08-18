@@ -7,7 +7,7 @@ initialize();
 function initialize() {
   // use "All" and assume it is first in the contracts
   var data = contracts[0];
-  updateTable([data]);
+  updateTable("All");
   updateMap("All", "All");
   updateCharts("All")
 }
@@ -26,9 +26,7 @@ function select_office_button(office) {
 }
 
 function update(office) {
-  // grab the new data set and fire of d3 and the map
-  var data = contracts.find(function(table) { return table.office == office });
-  updateTable([data]);
+  updateTable(office);
   updateMap(current_office, office);
   updateCharts(office);
   // change current office to new selection
