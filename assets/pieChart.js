@@ -9,7 +9,8 @@ function PieChart(dataSet, label) {
   // set up SVG and components
   var svg = d3.select("#"+label+"Chart")
     .append("svg")
-    .attr("height", height)
+    .attr("height", height+100)
+    .attr("width", width+100)
     .append("g")
 
   svg.append("g")
