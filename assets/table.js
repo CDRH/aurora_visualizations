@@ -2,9 +2,7 @@
 // https://bl.ocks.org/boeric/e16ad218bc241dfd2d6e
 // "D3 Dynamic Array of Tables"
 function updateTable(office, sort) {
-  console.log("updating table " + sort);
   sort = sort || "contract_date";
-  console.log("sort " + sort);
   var officeRows = contracts.find(function(table) {
     return table.office == office
   });
