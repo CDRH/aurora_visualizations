@@ -32,6 +32,7 @@ table {
 .table-col-sorted {
   font-weight: bold;
   color: black;
+  pointer-events: none;
 }
 
 /* PIE CHARTS */

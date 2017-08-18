@@ -66,11 +66,14 @@ function updateTable(office, sort) {
   var tableEnter = divEnter.append("table")
       .attr("id", function(d) { return d.office })
       .attr("class", "table table-condensed table-striped table-bordered");
-  tableEnter.append("thead")
+
+  var headerLinks = tableEnter.append("thead")
     .append("tr")
       .selectAll("th")
       .data(d3.keys(headers))
-    .enter().append("th").append("a")
+    .enter()
+      .append("th")
+      .append("a")
       .text(function(d) { return headers[d]; })
       .on('click', function(d) {
         updateTable(office, d);
