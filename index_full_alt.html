@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <!-- leaflet stylesheet and js -->
+    <link rel="stylesheet" href="vendor/leaflet-1.2.0/leaflet.css">
+    <script src="vendor/leaflet-1.2.0/leaflet.js"></script>
+
+    <!-- jquery + bootstrap stylesheet and js -->
+    <script src="vendor/jquery-3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="vendor/bootstrap-3.3.7/css/bootstrap.min.css"/>
+    <script src="vendor/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- leaflet plugin for fullscreenability -->
+    <link rel="stylesheet" href="vendor/leaflet.fullscreen-1.4.3/leaflet.fullscreen.css"/>
+    <script src="vendor/leaflet.fullscreen-1.4.3/leaflet.fullscreen.js"></script>
+
+    <!-- jquery UI for the timeslider -->
+    <script src="vendor/jquery-ui-custom-1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="vendor/jquery-ui-custom-1.12.1/jquery-ui.min.css"/>
+
+    <!-- time slider -->
+    <script src="vendor/leaflet.slider.js"></script>
+
+    <!-- d3 for graphs and table -->
+    <script src="vendor/d3-3.5.6/d3.min.js"></script>
+
+    <!-- aurora stylesheet -->
+    <link rel="stylesheet" href="assets/style.css">
+
+    <style>
+
+    #map {
+  background-color: grey;
+  border-color: black;
+  border-style: solid;
+  border-width: 2px;
+  height: 100%;
+  width: 100%;
+}
+
+    </style>
+
+    <!-- aurora data -->
+    <script src="data/destinations.js"></script>
+    <script src="data/contracts.js"></script>
+    <script src="data/contracts_geojson.js"></script>
+    <script src="data/destination_geojson.js"></script>
+    <script src="data/destination_class.js"></script>
+    <script src="data/gender.js"></script>
+    <script src="data/group.js"></script>
+    <script src="data/occupation.js"></script>
+    <script src="assets/table.js"></script>
+  </head>
+
+  <body>
+   
+        <div id="map"></div>
+  </body>
+
+  <!-- includes map and script here, as leaflet requires DOM drawn before beginning -->
+  <script src="assets/map_alt.js"></script>
+  <script src="assets/pieChart.js"></script>
+  <script src="assets/script.js"></script>
+
+</html>
