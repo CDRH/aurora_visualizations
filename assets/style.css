@@ -5,8 +5,9 @@
   border-color: black;
   border-style: solid;
   border-width: 2px;
-  height: 300px;
-  width: 600px;
+  height: 45vh;
+  min-height: 400px;
+  width: 100%;
 }
 
 /* all controls located on bottom */
@@ -52,10 +53,18 @@
   overflow: scroll;
 }
 
+.office-btns {
+	width: 100%;
+}
+
+.panel_key {
+	margin-top: 10px;
+}
+
 /* CONTRACTS TABLE */
 
 table {
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .table-col-sorted {
@@ -69,6 +78,20 @@ table {
 /* Note: width and height being controlled in the
    piechart implementation
 */
+
+.charts {
+	margin-top: 10px;
+}
+
+.charts p {
+	text-align: center;
+	font-weight: 800;
+}
+
+svg {
+	overflow: visible !important;
+	/*margin-bottom: -80px;*/
+}
 
 /* label lines */
 polyline {
@@ -84,80 +107,106 @@ polyline {
 
 /* destination class */
 .dclass_within_county {
-  fill: #DCDC61;
+  fill: #6C69C5;
 }
 
 .dclass_proximate_county {
-  fill: #DCAF61;
+  fill: #9194EE;
 }
 
 .dclass_north_or_south_border {
-  fill: #AC61DC;
+  fill: #522AAC;
 }
 
 .dclass_north {
-  fill: #6161DC;
+  fill: #9277D0;
 }
 
 .dclass_internal_south {
-  fill: #D68080;
+  fill: #622987;
 }
 
 .dclass_internal_or_deep_south {
-  fill: #993D3D;
+  fill: #9E71BA;
 }
 
 .dclass_unknown {
-  fill: grey;
+  fill: #D8C3E5;
 }
 
 /* gender */
 .gender_female {
-  fill: #98abc5; /* light blue */
+  fill: #34676B;
 }
 
 .gender_male {
-  fill: #8a89a6; /* lavender */
+  fill: #559092;
 }
 
 .gender_unknown {
-  fill: #6b486b; /* plum */
+  fill: #035157;
 }
 
 /* group */
 .group_group {
-  fill: #767471;
+  fill: #C45F4B;
 }
 
 .group_individual {
-  fill: #EAB360;
+  fill: #E08C80;
 }
 
 .group_family {
-  fill: #D5D211;
+  fill: #C14747;
 }
 
 .group_unknown {
-  fill: grey;
+  fill: #892929;
 }
 
 /* occupation */
 .occupation_agricultural {
-  fill: #5FAA6F;
+  fill: #298938;
 }
 
 .occupation_domestic {
-  fill: #D4E892;
+  fill: #79CB87;
 }
 
 .occupation_laborer {
-  fill: #677145;
+  fill: #2D5A34;
 }
 
 .occupation_other {
-  fill: #186D23;
+  fill: #449913;
 }
 
 .occupation_unknown {
-  fill: #D6DCD7;
+  fill: #CBEAB9;
 }
+
+
+/* Header */
+
+.site_header {
+	background-color: #35686c;
+	border-bottom: 2px solid #333433;
+	margin-bottom: 10px;
+}
+
+.site_header h1, .site_header h2 {
+	color: #fff;
+	text-shadow: 2px 2px 2px #000;
+	padding: 0;
+	margin: 8px 0;
+}
+
+.about_button {
+	margin: 8px 0;
+}
+
+
+
+
+
+

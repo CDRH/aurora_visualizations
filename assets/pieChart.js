@@ -3,13 +3,13 @@
 
 function PieChart(dataSet, label) {
   var width = 300,
-      height = 200,
+      height = 180,
     radius = Math.min(width,height) / 2;
 
   // set up SVG and components
   var svg = d3.select("#"+label+"Chart")
     .append("svg")
-    .attr("height", height+100)
+    .attr("height", height)
     .attr("width", width+100)
     .append("g")
 

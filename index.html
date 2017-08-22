@@ -3,7 +3,7 @@
     <meta charset="utf-8">
     <meta name="author" content="Center for Digital Research in the Humanities, University of Nebraska">
     <meta name="description" content="Analysis of contracts made at several Freedmen's Bureaus in the years following the American Civil War.">
-    <title>Aurora</title>
+    <title>Reconstruction African American Mobility after Emancipation, 1865-1867</title>
 
     <!-- load the script loader -->
     <script src="vendor/lab.min.js"></script>
@@ -21,8 +21,17 @@
   </head>
 
   <body>
-    <h1>Freedmen's Bureau Contracts<h1>
-    <h2 id="officeTitle">All</h2>
+  
+  <header class="site_header">
+  <div class="container-fluid">
+
+  <a class="btn btn-default pull-right about_button" href="about.html" role="button">About</a>
+    <h1>Reconstruction African American Mobility after Emancipation, 1865-1867</h1>
+    <h2>William G. Thomas III, Richard G. Healey, and Ian Cottingham</h2>
+    <!-- <h2 id="officeTitle"></h2> -->
+    </div>
+    </header>
+    <div class="container-fluid">
     <div class="row">
 
       <!-- offices navigation -->
@@ -37,14 +46,22 @@
           <button class="btn btn-default btn-office" onclick="update('Petersburg');">Petersburg</button>
           <button class="btn btn-default btn-office" onclick="update('Wisewell Barracks');">Wisewell Barracks</button>
         </div>
+
+
+        <div class="panel panel-default panel_key">
+          <div class="panel-body">
+            <p>Click on the lines and circle markers to view more information</p>
+          </div>
+        </div>
+        
       </div>
 
       <!-- map -->
       <div class="col-md-10">
         <div id="map">
         </div>
-        <a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> | Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> — Map data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
-        <p>Click on the lines and circle markers to view more information</p>
+        
+        
       </div>
     </div>
 
@@ -66,8 +83,10 @@
 
     <!-- table of contracts -->
     <div class="contracts">
-      <h2>Contracts</h2>
+      <h2>Contracts for <span id="officeTitle">All</span> <small>(Click column headings to sort)</h2>
     </div>
+
+    </div><!-- /container -->
 
     <script>
       $LAB
