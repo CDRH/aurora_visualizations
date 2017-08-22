@@ -61,6 +61,16 @@
 	margin-top: 10px;
 }
 
+.btn-default.active {
+  background-color: #005158 !important; /* Dark Teal */
+  color: #fff !important;
+}
+
+.btn-default:hover {
+  background-color: #529092 !important; /* Teal */
+  color: #fff !important;
+}
+
 /* CONTRACTS TABLE */
 
 table {
