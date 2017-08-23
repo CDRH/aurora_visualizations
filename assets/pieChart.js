@@ -143,7 +143,7 @@ function PieChart(dataSet, label) {
       .attr("class", "graph_label")
       .attr("style", "opacity: 0")
       .text(function(d) {
-        return d.data.property;
+        return d.data.property+": "+d.data.contracts;
       })
       .each(function(d) {
         this._current = d;
@@ -167,6 +167,10 @@ function PieChart(dataSet, label) {
       // if there are 0 contracts, hide the label
       .style("opacity", function(d) {
         return d.data.contracts == 0 ? 0 : 1;
+      })
+      .text(function(d) {
+        return d.data.property+": "+d.data.contracts;
+
       })
       .attrTween("transform", function(d) {
         var interpolate = d3.interpolate(this._current, d);
