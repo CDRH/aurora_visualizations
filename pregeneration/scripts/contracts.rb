@@ -43,13 +43,19 @@ output_occupation = "#{output_dir}/occupation.js"
 }
 
 @mapping_group = {
-  "G" => "Group",
   "I" => "Individual",
+  "G" => "Group",
   "F" => "Family",
   "U" => "Unknown"
 }
 
-@mapping_occupation = ["Agricultural", "Laborer", "Domestic", "Other", "Unknown"]
+@mapping_occupation = [
+  "Domestic",
+  "Agricultural",
+  "Other",
+  "Laborer",
+  "Unknown"
+]
 
 @combined_contract_routes = { "All" => {} }
 @destination_popularity = { "All" => {} }
