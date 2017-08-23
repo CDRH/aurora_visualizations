@@ -38,7 +38,6 @@
   margin: auto;
 }
 
-
 /* using important tag to override inline styles defined
    in the slider JS library
 */
@@ -195,7 +194,6 @@ polyline {
   fill: #CBEAB9;
 }
 
-
 /* Header */
 
 .site_header {
@@ -214,9 +212,3 @@ polyline {
 .about_button {
 	margin: 8px 0;
 }
-
-
-
-
-
-
