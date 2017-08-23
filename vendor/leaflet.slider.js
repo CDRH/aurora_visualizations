@@ -1,3 +1,5 @@
+/* Copyright Dennis Wilhelm, 2013; Licensed MIT */
+
 L.Control.SliderControl = L.Control.extend({
     options: {
         position: 'topright',
@@ -83,7 +85,7 @@ L.Control.SliderControl = L.Control.extend({
 
     onRemove: function (map) {
         //Delete all markers which where added via the slider and remove the slider div
-        for (i = this.options.minValue; i < this.options.maxValue; i++) {
+        for (i = this.options.minValue; i <= this.options.maxValue; i++) {
             map.removeLayer(this.options.markers[i]);
         }
         $('#leaflet-slider').remove();

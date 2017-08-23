@@ -16,10 +16,8 @@
 }
 
 .leaflet-control-attribution {
-  /*
-    hiding from map pane rather than separate attribution
-    entirely in case of map div being reused elsewhere
-  */
+  /* hiding from map pane rather than separate attribution
+    entirely in case of map div being reused elsewhere */
   display: none;
 }
 

@@ -21,7 +21,7 @@ This site pregenerates the JSON used to power the map, charts, and table views f
 
 The map is powered by [Leaflet](http://leafletjs.com/).  Its base layer is pulling from [Stamen Design's Toner Lite](http://maps.stamen.com/toner-lite/#12/37.7706/-122.3782) and therefore also [OpenStreetMap](http://openstreetmap.org/).
 
-The map also utilizes a slider for date range selection, [LeafletSlider](https://github.com/dwilhelm89/LeafletSlider), from its [master branch at the time](https://github.com/dwilhelm89/LeafletSlider/commit/9b01d11fce5d6a4b2dd71f8a85f941091897799c).  The slider requires [jQuery UI](https://jqueryui.com/).
+The map also utilizes a slider for date range selection, [LeafletSlider](https://github.com/dwilhelm89/LeafletSlider), from a fork's branch [removeAllMarkers](https://github.com/jduss4/LeafletSlider/tree/removeAllMarkers).  The slider requires [jQuery UI](https://jqueryui.com/).
 
 Finally, the map's fullscreen ability is provided by [leaflet.fullscreen](https://github.com/brunob/leaflet.fullscreen).
 

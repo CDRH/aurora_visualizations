@@ -54,9 +54,7 @@ function updateMap(current, requested) {
   destination_layer.clearLayers();
   destination_layer.addData(destination_geojson[requested]);
   // swap the timeslider
-  // TODO is there a better way to implement this than rerunning the onAdd method each time?
-  time_sliders[current].remove();
-  map.removeControl(time_sliders[requested]);
+  map.removeControl(time_sliders[current]);
   map.addControl(time_sliders[requested]);
   time_sliders[requested].startSlider();
 };
@@ -129,6 +127,5 @@ L.control.fullscreen({
 }).addTo(map);
 
 // add "All" at beginning
-map.addLayer(office_layers["All"]);
 map.addControl(time_sliders["All"]);
 time_sliders["All"].startSlider();
