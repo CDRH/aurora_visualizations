@@ -10,7 +10,7 @@ function PieChart(dataSet, label) {
   var svg = d3.select("#"+label+"Chart")
     .append("svg")
     .attr("height", height)
-    .attr("width", width+100)
+    .attr("width", width)
     .append("g")
 
   svg.append("g")
@@ -34,7 +34,7 @@ function PieChart(dataSet, label) {
 
   // controls the location of the labels
   var outerArc = d3.svg.arc()
-    .innerRadius(radius * 0.8)
+    .innerRadius(radius * 0.6)
     .outerRadius(radius * 1);
 
   // center the pie chart
@@ -46,11 +46,42 @@ function PieChart(dataSet, label) {
   // grab the correct office's data and kick off "change"
   this.updateChart = function(office) {
     var requested = dataSet[office];
-    change(requested);
+    change(office, requested);
+  }
+
+  // adding unfortunate code because there are only
+  // a few cases where labels are overlapping
+  // and since this dataset is not going to change
+  // I'd rather hardcode it once instead of creating a self-organizing map
+  function hardcodedPosShift(office, pos, d) {
+    var prop = d.data.property;
+    if (office == "Alexandria") {
+    // Alexandria needs to shift Unknown up and Laborer down
+      if (prop == "Unknown") {
+        pos[1] -= 4;
+      } else if (prop == "Laborer") {
+        pos[1] += 5;
+      }
+    } else if (office == "Memphis") {
+    // Memphis needs to shift Unknown up and Other down
+      if (prop == "Unknown") {
+        pos[1] -= 4;
+      } else if (prop == "Other") {
+        pos[1] += 2;
+      }
+    } else if (office == "Petersburg") {
+    // Petersburg needs to shift Laborer up and Other down
+      if (prop == "Laborer") {
+        pos[1] -= 2;
+      } else if (prop == "Other") {
+        pos[1] += 3;
+      }
+    }
+    return pos;
   }
 
   // updates the pie chart to new selection smoothly
-  function change(newData) {
+  function change(office, newData) {
     var duration = "500";
 
     // get existing values of pie chart
@@ -112,7 +143,7 @@ function PieChart(dataSet, label) {
       .attr("class", "graph_label")
       .attr("style", "opacity: 0")
       .text(function(d) {
-        return d.data.property;
+        return d.data.property+": "+d.data.contracts;
       })
       .each(function(d) {
         this._current = d;
@@ -137,16 +168,20 @@ function PieChart(dataSet, label) {
       .style("opacity", function(d) {
         return d.data.contracts == 0 ? 0 : 1;
       })
+      .text(function(d) {
+        return d.data.property+": "+d.data.contracts;
+
+      })
       .attrTween("transform", function(d) {
         var interpolate = d3.interpolate(this._current, d);
         var _this = this;
-        // TODO figure out what the specifics are doing below
-        // besides ultimately shifting the position of the label
+        // -val show label on left of pie chart, +val on right
         return function(t) {
           var d2 = interpolate(t);
           _this._current = d2;
           var pos = outerArc.centroid(d2);
           pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+          pos = hardcodedPosShift(office, pos, d);
           return "translate("+ pos +")";
         };
       })
@@ -200,6 +235,7 @@ function PieChart(dataSet, label) {
           var d2 = interpolate(t);
           _this._current = d2;
           var pos = outerArc.centroid(d2);
+          pos = hardcodedPosShift(office, pos, d);
           pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
           return [arc.centroid(d2), outerArc.centroid(d2), pos];
         };
