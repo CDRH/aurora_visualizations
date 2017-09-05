@@ -10,6 +10,11 @@
   width: 100%;
 }
 
+.contractProperties {
+  max-height: 200px;
+  overflow: scroll;
+}
+
 /* all controls located on bottom */
 .leaflet-bottom {
   width: 95%;
@@ -44,11 +49,6 @@
 }
 
 /* SIDE NAV */
-
-.contractProperties {
-  max-height: 200px;
-  overflow: scroll;
-}
 
 .office-btns {
 	width: 100%;

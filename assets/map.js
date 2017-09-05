@@ -1,3 +1,21 @@
+// CREATE HTML FOR LIST OF CONTRACTS PER FEATURE
+function contracts_html(properties) {
+  html = ""
+  properties.contracts.forEach(function(prop) {
+    html += "<strong>" + prop.name + "</strong>";
+    html += "<ul class='contractDesc'>";
+      html += "<li>Worker Age: " + prop.age + "</li>";
+      html += "<li>Worker Gender: " + prop.gender + "</li>";
+      html += "<li>Work Type: " + prop.work_class + "</li>";
+      html += "<li>Contract Date: " + prop.contract_date + "</li>";
+      html += "<li>Contract Employer: " + prop.employer + "</li>";
+      html += "<li>Wages: " + prop.wages_month + "</li>";
+      html += "<li>Period: " + prop.service_months + "</li>";
+    html += "</ul>"
+  });
+  return html;
+}
+
 // STYLE DESTINATION CIRCLES
 function destinationMarkerOptions(feature) {
   count = +feature.properties.count;
@@ -19,9 +37,12 @@ function destinationMarkerOptions(feature) {
 
 // BIND POPUP TO DESTINATION
 function onEachDestination(feature, layer) {
-  prop = feature.properties;
-  html = "<h3>" + prop.label + "</h3>";
-  html += "<p>Contracts: " + prop.count + "</p>";
+  props = feature.properties;
+  html = "<div class='contractProperties'>";
+  html += "<h3>" + props.label + "</h3>";
+  html += "<p>Contracts (all dates): " + props.count + "</p>";
+  html += contracts_html(props);
+  html += "</div>";
   layer.bindPopup(html);
 };
 
@@ -30,19 +51,8 @@ function onEachLine(feature, layer) {
   var props = feature.properties;
   var html = "<div class='contractProperties'>";
   html += "<h4>"+props.office+" to "+props.destination+"</h3>";
-  html += "<p>"+props.date+": "+props.contracts.length+" contract(s)</p>";
-  props.contracts.forEach(function(prop) {
-    html += "<strong>" + prop.name + "</strong>";
-    html += "<ul class='contractDesc'>";
-      html += "<li>Worker Age: " + prop.age + "</li>";
-      html += "<li>Worker Gender: " + prop.gender + "</li>";
-      html += "<li>Work Type: " + prop.work_class + "</li>";
-      html += "<li>Contract Date: " + prop.contract_date + "</li>";
-      html += "<li>Contract Employer: " + prop.employer + "</li>";
-      html += "<li>Wages: " + prop.wages_month + "</li>";
-      html += "<li>Period: " + prop.service_months + "</li>";
-    html += "</ul>"
-  });
+  html += "<p>Only contracts on "+props.date+": "+props.contracts.length+" contract(s)</p>";
+  html += contracts_html(props);
   html += "</div>";
   layer.bindPopup(html);
 };

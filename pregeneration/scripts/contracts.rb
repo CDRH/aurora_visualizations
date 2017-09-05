@@ -1,6 +1,7 @@
 require 'csv'
 require 'json'
 
+
 ##### contracts generation #####
 #
 # 2017 August
@@ -77,8 +78,9 @@ end
 @group = { "All" => zeroed_hash(@mapping_group) }
 @occupation = { "All" => zeroed_hash(@mapping_occupation) }
 
-def add_destination(office_key, latlng, label)
-  lat, lng = latlng.split("|")
+def add_destination(office_key, fields)
+  lat, lng, latlng = get_latlng(fields["destination_lat"], fields["destination_lng"])
+  label = destination_label(fields["township"], fields["county"], fields["state"])
   if !@destination_popularity.has_key?(office_key)
     @destination_popularity[office_key] = {}
   end
@@ -86,16 +88,16 @@ def add_destination(office_key, latlng, label)
   if !office.has_key?(latlng)
     destination = {
       "label" => label,
-      "count" => 0,
       "lat" => lat,
-      "lng" => lng
+      "lng" => lng,
+      "contracts" => []
     }
     office[latlng] = destination
     # clone or else magic and doubled numbers
     @destination_popularity["All"][latlng] = destination.clone
   end
-  office[latlng]["count"] += 1
-  @destination_popularity["All"][latlng]["count"] += 1
+  @destination_popularity["All"][latlng]["contracts"] << fields
+  @destination_popularity[office_key][latlng]["contracts"] << fields
 end
 
 def chart_formatter(variable)
@@ -136,13 +138,7 @@ def combine_contract_routes(office, fields)
   end
 
   destination = destination_label(fields["township"], fields["county"], fields["state"])
-
-  lat = fields["destination_lat"].to_f
-  lng = fields["destination_lng"].to_f
-  # yes, I know I split this apart originally, but that helped normalize the fields!
-  latlng = "#{lat}|#{lng}"
-  # TODO probably this should be not happening in this method
-  add_destination(office, latlng, destination)
+  lat, lng, latlng = get_latlng(fields["destination_lat"], fields["destination_lng"])
 
   if !hiring_office[date].has_key?(latlng)
     feature_params = [office, date, destination, fields, lat, lng]
@@ -210,6 +206,15 @@ def get_fields(row)
   }
 end
 
+def get_latlng(latitude, longitude)
+  lat = latitude.to_f
+  lng = longitude.to_f
+  # yes, I know I split this apart originally,
+  # but that helped normalize the fields! now stick back together
+  latlng = "#{lat}|#{lng}"
+  return lat, lng, latlng
+end
+
 def tally_field(office, counter, value, mapping)
   if !counter.has_key?(office)
     counter[office] = zeroed_hash(mapping)
@@ -234,6 +239,7 @@ CSV.foreach(input, headers: true) do |row|
   # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
   combine_contract_routes(office, fields.clone)
+  add_destination(office, fields.clone)
 end
 
 # TABLE display organization
@@ -290,7 +296,8 @@ destination_geojson = {}
       "type" => "Feature",
       "properties" => {
         "label" => destination["label"],
-        "count" => destination["count"]
+        "count" => destination["contracts"].length,
+        "contracts" => destination["contracts"]
       },
       "geometry" => {
         "type" => "Point",
