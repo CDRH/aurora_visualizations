@@ -113,13 +113,30 @@ for (var office in office_layers) {
   });
 }
 
-// start map with destination layer displayed
+var rr_1861_layer = L.geoJSON(rr_1861, {
+  style: function(feature) {
+    return { "weight" : 0.5, "color" : "green" }
+  }
+});
+
+var rr_1870_layer = L.geoJSON(rr_1870, {
+  style: function(feature) {
+    return { "weight" : 0.5, "color" : "blue" }
+  }
+});
+
+// start map with destination layer and 1861 railroad displayed
 map.addLayer(destination_layer);
+map.addLayer(rr_1861_layer);
 
 // add layer controls to the map
 //   first param: base layer (one selectable)
 //   second param: opt. layers (mult selectable)
-L.control.layers({}, {"Popularity of Destination": destination_layer}, { collapsed: false }).addTo(map);
+L.control.layers(
+  { "1861 Railroads": rr_1861_layer, "1870 Railroads": rr_1870_layer },
+  { "Popularity of Destination": destination_layer },
+  { collapsed: false }
+).addTo(map);
 
 // add the fullscreen control to the map
 L.control.fullscreen({
