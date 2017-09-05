@@ -35,7 +35,6 @@ class Contracts
     end
     hiring_office[date][latlng]["properties"]["contracts"] << fields.clone
     @combined_routes["All"][date][latlng]["properties"]["contracts"] << fields.clone
-
   end
 
   def add_to_table(office, fields)

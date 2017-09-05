@@ -38,12 +38,13 @@ class Destinations
       }
       destinations = office_info.values
       destinations.each do |destination|
+        contracts = destination["contracts"].sort_by { |c| c["contract_date"] }
         geojson_obj = {
           "type" => "Feature",
           "properties" => {
             "label" => destination["label"],
             "count" => destination["contracts"].length,
-            "contracts" => destination["contracts"]
+            "contracts" => contracts
           },
           "geometry" => {
             "type" => "Point",

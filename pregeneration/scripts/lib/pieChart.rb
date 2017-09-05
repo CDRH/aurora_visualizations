@@ -1,6 +1,4 @@
 class PieChart
-  attr_accessor :counter
-  attr_reader :type
 
   @@mappings = {
     "destination_class" => {
