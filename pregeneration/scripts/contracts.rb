@@ -1,6 +1,8 @@
 require 'csv'
 require 'json'
+require_relative 'lib/helpers.rb'
 require_relative 'lib/pieChart.rb'
+require_relative 'lib/destinations.rb'
 
 ##### contracts generation #####
 #
@@ -27,31 +29,7 @@ output_gender = "#{output_dir}/gender.js"
 output_occupation = "#{output_dir}/occupation.js"
 
 @combined_contract_routes = { "All" => {} }
-@destination_popularity = { "All" => {} }
 @office_contracts = { "All" => [] }
-
-
-def add_destination(office_key, fields)
-  lat, lng, latlng = get_latlng(fields["destination_lat"], fields["destination_lng"])
-  label = destination_label(fields["township"], fields["county"], fields["state"])
-  if !@destination_popularity.has_key?(office_key)
-    @destination_popularity[office_key] = {}
-  end
-  office = @destination_popularity[office_key]
-  if !office.has_key?(latlng)
-    destination = {
-      "label" => label,
-      "lat" => lat,
-      "lng" => lng,
-      "contracts" => []
-    }
-    office[latlng] = destination
-    # clone or else magic and doubled numbers
-    @destination_popularity["All"][latlng] = destination.clone
-  end
-  @destination_popularity["All"][latlng]["contracts"] << fields
-  @destination_popularity[office_key][latlng]["contracts"] << fields
-end
 
 def combine_contract_routes(office, fields)
   # assumes that no empty destination lat/lng passed through
@@ -102,13 +80,6 @@ def geojson_feature(office, date, destination, fields, lat, lng)
   }
 end
 
-def destination_label(township, county, state)
-  return [township, county, state]
-    .reject(&:nil?)
-    .reject(&:empty?)
-    .join(", ")
-end
-
 def get_fields(row)
   # there are a number of fields on the spreadsheet
   # that were used for calculations, this pairs it down to display / map fields
@@ -138,14 +109,8 @@ def get_fields(row)
   }
 end
 
-def get_latlng(latitude, longitude)
-  lat = latitude.to_f
-  lng = longitude.to_f
-  # yes, I know I split this apart originally,
-  # but that helped normalize the fields! now stick back together
-  latlng = "#{lat}|#{lng}"
-  return lat, lng, latlng
-end
+# make destinations instance
+destinations = Destinations.new
 
 # make pie charts for four categories
 destination_class = PieChart.new("destination_class")
@@ -171,7 +136,7 @@ CSV.foreach(input, headers: true) do |row|
   # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
   combine_contract_routes(office, fields.clone)
-  add_destination(office, fields.clone)
+  destinations.add(office, fields.clone)
 end
 
 # TABLE display organization
@@ -215,30 +180,7 @@ contracts_geojson = {
   end
 end
 
-# destination wrangling
-destination_geojson = {}
-@destination_popularity.each do |office_key, office_info|
-  destination_geojson[office_key] = {
-    "type" => "FeatureCollection",
-    "features" => []
-  }
-  destinations = office_info.values
-  destinations.each do |destination|
-    geojson_obj = {
-      "type" => "Feature",
-      "properties" => {
-        "label" => destination["label"],
-        "count" => destination["contracts"].length,
-        "contracts" => destination["contracts"]
-      },
-      "geometry" => {
-        "type" => "Point",
-        "coordinates" => [destination["lng"], destination["lat"]]
-      }
-    }
-    destination_geojson[office_key]["features"] << geojson_obj
-  end
-end
+destination_geojson = destinations.to_geojson
 
 dest_class_json = destination_class.chart_formatter
 group_json = group.chart_formatter
