@@ -44,7 +44,7 @@ The layout of this site uses [Bootstrap](http://getbootstrap.com/) and [jQuery](
 Install [ruby 2.4.1](https://www.ruby-lang.org/en/downloads/).  The script is running off of data at `pregeneration/csv/contracts.csv`.  Make changes as needed, then run:
 
 ```
-ruby pregeneration/scripts/contracts.rb
+ruby pregeneration/scripts/pregenerate.rb
 ```
 
 This will update the files in the data repository.  You should see changes immediately upon refreshing your browser.
