@@ -170,7 +170,6 @@ function PieChart(dataSet, label) {
       })
       .text(function(d) {
         return d.data.property+": "+d.data.contracts;
-
       })
       .attrTween("transform", function(d) {
         var interpolate = d3.interpolate(this._current, d);

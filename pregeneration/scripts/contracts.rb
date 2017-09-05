@@ -1,6 +1,6 @@
 require 'csv'
 require 'json'
-
+require_relative 'lib/pieChart.rb'
 
 ##### contracts generation #####
 #
@@ -26,57 +26,10 @@ output_group = "#{output_dir}/group.js"
 output_gender = "#{output_dir}/gender.js"
 output_occupation = "#{output_dir}/occupation.js"
 
-# mappings for fields
-@mapping_dest_class = {
-  "C" => "Within County",
-  "P" => "Proximate County",
-  "BN" => "North or South Border",
-  "N" => "North",
-  "I" => "Internal South",
-  "I/DS" => "Internal or Deep South",
-  "U" => "Unknown"
-}
-
-@mapping_gender = {
-  "female" => "Female",
-  "male" => "Male",
-  "unknown" => "Unknown"
-}
-
-@mapping_group = {
-  "I" => "Individual",
-  "G" => "Group",
-  "F" => "Family",
-  "U" => "Unknown"
-}
-
-@mapping_occupation = [
-  "Domestic",
-  "Agricultural",
-  "Other",
-  "Laborer",
-  "Unknown"
-]
-
 @combined_contract_routes = { "All" => {} }
 @destination_popularity = { "All" => {} }
 @office_contracts = { "All" => [] }
 
-# bumping this above the counter holders below
-def zeroed_hash(mapping)
-  if mapping.class == Hash
-    mapping.map{ |k, v| [v, 0] }.to_h
-  elsif mapping.class == Array
-    mapping.map { |v| [v, 0] }.to_h
-  else
-    raise "Not sure how to process mapping of class #{mapping.class}"
-  end
-end
-
-@destination_class = { "All" => zeroed_hash(@mapping_dest_class) }
-@gender = { "All" => zeroed_hash(@mapping_gender) }
-@group = { "All" => zeroed_hash(@mapping_group) }
-@occupation = { "All" => zeroed_hash(@mapping_occupation) }
 
 def add_destination(office_key, fields)
   lat, lng, latlng = get_latlng(fields["destination_lat"], fields["destination_lng"])
@@ -98,27 +51,6 @@ def add_destination(office_key, fields)
   end
   @destination_popularity["All"][latlng]["contracts"] << fields
   @destination_popularity[office_key][latlng]["contracts"] << fields
-end
-
-def chart_formatter(variable)
-  chart_data = {}
-  variable.each do |office, office_info|
-    chart_data[office] = []
-    office_info.each do |property, number|
-      chart_data[office] << { "property" => property, "contracts" => number }
-    end
-  end
-  return chart_data
-end
-
-def code_to_label(mapping, code)
-  if mapping.class == Hash
-    return mapping[code] || "Unknown"
-  elsif mapping.class == Array
-    return mapping.include?(code) ? code : "Unknown"
-  else
-    raise "Not sure how to process mapping of class #{mapping.class}"
-  end
 end
 
 def combine_contract_routes(office, fields)
@@ -186,7 +118,7 @@ def get_fields(row)
     "hiring_office" => row["hiring_office"],
     "contract_date" => row["contract_date"] || "",
     "name" => row["label"] || "",
-    "gender" => code_to_label(@mapping_gender, row["gender"]),
+    "gender" => PieChart.code_to_label("gender", row["gender"]),
     "age" => row["age"] || "",
     "employer" => row["employer_agent"] || "",
     "township" => row["township"] || "",
@@ -194,11 +126,11 @@ def get_fields(row)
     "state" => row["state"] || "",
     "distance_miles" => row["Distance/m"] || "",
     "position" => row["position"] || "",
-    "work_class" => code_to_label(@mapping_occupation, row["work_class"]),
+    "work_class" => PieChart.code_to_label("occupation", row["work_class"]),
     "service_months" => row["length_of_service_monthly"] || "",
     "wages_months" => row["rate_of_pay_monthly"] || "",
-    "destination_class" => code_to_label(@mapping_dest_class, row["distance"]),
-    "group" => code_to_label(@mapping_group, row["group"]),
+    "destination_class" => PieChart.code_to_label("destination_class", row["distance"]),
+    "group" => PieChart.code_to_label("group", row["group"]),
     "destination_lat" => dest_lat,
     "destination_lng" => dest_lng,
     "office_lat" => office_lat,
@@ -215,13 +147,11 @@ def get_latlng(latitude, longitude)
   return lat, lng, latlng
 end
 
-def tally_field(office, counter, value, mapping)
-  if !counter.has_key?(office)
-    counter[office] = zeroed_hash(mapping)
-  end
-  counter[office][value] += 1
-  counter["All"][value] += 1
-end
+# make pie charts for four categories
+destination_class = PieChart.new("destination_class")
+gender = PieChart.new("gender")
+group = PieChart.new("group")
+occupation = PieChart.new("occupation")
 
 CSV.foreach(input, headers: true) do |row|
   office = row["hiring_office"].strip
@@ -231,10 +161,12 @@ CSV.foreach(input, headers: true) do |row|
   # add to office_contracts for specific office and for all
   @office_contracts["All"] << fields.clone
   @office_contracts[office] << fields.clone
-  tally_field(office, @destination_class, fields["destination_class"], @mapping_dest_class)
-  tally_field(office, @gender, fields["gender"], @mapping_gender)
-  tally_field(office, @group, fields["group"], @mapping_group)
-  tally_field(office, @occupation, fields["work_class"], @mapping_occupation)
+
+  # add contract's info to pie chart tallies
+  destination_class.tally_field(office, fields["destination_class"])
+  gender.tally_field(office, fields["gender"])
+  group.tally_field(office, fields["group"])
+  occupation.tally_field(office, fields["work_class"])
 
   # skip all the mapping related steps if there is no specific destination
   next if fields["destination_lng"].to_f == 0.0 || fields["destination_lat"].to_f == 0.0
@@ -308,10 +240,10 @@ destination_geojson = {}
   end
 end
 
-dest_class_json = chart_formatter(@destination_class)
-group_json = chart_formatter(@group)
-gender_json = chart_formatter(@gender)
-occupation_json = chart_formatter(@occupation)
+dest_class_json = destination_class.chart_formatter
+group_json = group.chart_formatter
+gender_json = gender.chart_formatter
+occupation_json = occupation.chart_formatter
 
 File.open(output_table, "w") { |f| f.write("var contracts = #{offices.to_json};") }
 File.open(output_contracts_geojson, "w") { |f| f.write("var contracts_geojson = #{contracts_geojson.to_json};") }
