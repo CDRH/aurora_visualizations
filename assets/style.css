@@ -48,6 +48,10 @@
   margin-top: -20px !important;
 }
 
+#leaflet-slider .ui-slider-range {
+  background-color: #005158;
+}
+
 /* SIDE NAV */
 
 .office-btns {
