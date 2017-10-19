@@ -125,13 +125,13 @@ for (var office in office_layers) {
 
 var rr_1861_layer = L.geoJSON(rr_1861, {
   style: function(feature) {
-    return { "weight" : 0.5, "color" : "#35686c" }
+    return { "weight" : 1, "color" : "orange" }
   }
 });
 
 var rr_1870_layer = L.geoJSON(rr_1870, {
   style: function(feature) {
-    return { "weight" : 0.5, "color" : "#C14747" }
+    return { "weight" : 1, "color" : "#C14747" }
   }
 });
 
