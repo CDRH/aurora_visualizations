@@ -1,5 +1,7 @@
 # Aurora Visualization Demo
 
+Website:  http://railroads.unl.edu/mobility-after-emancipation/
+
 This is a single page view with visualizations of data collected from seven Freedmen's Bureaus' labor contracts at the Civil War's conclusion.
 
 - Alexandria (1866)
